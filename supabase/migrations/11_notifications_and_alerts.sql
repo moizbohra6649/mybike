@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. Notifications Table
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     showroom_id UUID REFERENCES public.showrooms(id) ON DELETE CASCADE,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     target_role VARCHAR(50), -- e.g. 'store_manager', 'inventory_manager', 'sales_executive', 'accountant', NULL for user-specific
@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(
 -- 2. Notification Preferences Table
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.notification_preferences (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
     inventory_alerts BOOLEAN NOT NULL DEFAULT TRUE,
     sales_milestones BOOLEAN NOT NULL DEFAULT TRUE,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS public.notification_preferences (
 -- 3. FCM Device Tokens Table
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.fcm_device_tokens (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
     platform VARCHAR(30) NOT NULL CHECK (platform IN ('android', 'ios', 'web', 'windows', 'macos', 'linux')),

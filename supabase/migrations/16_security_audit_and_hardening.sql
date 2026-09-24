@@ -19,14 +19,12 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
--- Enable RLS on storage.objects if not already enabled
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
 -- ---------------------------------------------------------------------
 -- 2. Storage Bucket Row-Level Security Policies (Tenant Scoped)
 -- ---------------------------------------------------------------------
 
 -- Policy: Allow authenticated users to view files in their assigned showroom folders
+DROP POLICY IF EXISTS "Authenticated users can read authorized showroom objects" ON storage.objects;
 CREATE POLICY "Authenticated users can read authorized showroom objects"
   ON storage.objects FOR SELECT
   TO authenticated
@@ -37,11 +35,12 @@ CREATE POLICY "Authenticated users can read authorized showroom objects"
       (SELECT is_super_admin(auth.uid()))
       OR
       -- Path structure is [showroom_id]/[category]/[filename]
-      (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid()))
+      (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid())::text)
     )
   );
 
 -- Policy: Allow authenticated users to upload only to their assigned showroom folders
+DROP POLICY IF EXISTS "Authenticated users can upload to authorized showroom objects" ON storage.objects;
 CREATE POLICY "Authenticated users can upload to authorized showroom objects"
   ON storage.objects FOR INSERT
   TO authenticated
@@ -50,11 +49,12 @@ CREATE POLICY "Authenticated users can upload to authorized showroom objects"
     AND (
       (SELECT is_super_admin(auth.uid()))
       OR
-      (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid()))
+      (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid())::text)
     )
   );
 
 -- Policy: Restrict update / delete to managers, compliance officers, and admins
+DROP POLICY IF EXISTS "Authorized managers and admins can delete or update objects" ON storage.objects;
 CREATE POLICY "Authorized managers and admins can delete or update objects"
   ON storage.objects FOR DELETE
   TO authenticated
@@ -65,7 +65,7 @@ CREATE POLICY "Authorized managers and admins can delete or update objects"
       OR
       (
         (SELECT has_permission('documents', 'delete'))
-        AND (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid()))
+        AND (storage.foldername(name))[1] IN (SELECT get_user_showroom_ids(auth.uid())::text)
       )
     )
   );

@@ -17,15 +17,15 @@ CREATE INDEX IF NOT EXISTS idx_sales_invoices_showroom_status
 
 -- Bookings: Filtered by showroom and sorted by booking date
 CREATE INDEX IF NOT EXISTS idx_bookings_showroom_date 
-  ON bookings(showroom_id, booking_date DESC);
+  ON bookings(showroom_id, created_at DESC);
 
 -- Bookings: Filtered by showroom and lifecycle status
 CREATE INDEX IF NOT EXISTS idx_bookings_showroom_status 
-  ON bookings(showroom_id, booking_status);
+  ON bookings(showroom_id, status);
 
--- Inventory Items: Filtered by showroom, stock status, and vehicle model
-CREATE INDEX IF NOT EXISTS idx_inventory_showroom_status_model 
-  ON inventory_items(showroom_id, status, model_id);
+-- Inventory Vehicles: Filtered by showroom, stock status, and vehicle variant
+CREATE INDEX IF NOT EXISTS idx_inventory_showroom_status_variant 
+  ON inventory_vehicles(showroom_id, status, variant_id);
 
 -- Customers: Filtered by showroom and sorted by creation date
 CREATE INDEX IF NOT EXISTS idx_customers_showroom_created 
@@ -35,9 +35,9 @@ CREATE INDEX IF NOT EXISTS idx_customers_showroom_created
 CREATE INDEX IF NOT EXISTS idx_finance_vouchers_showroom_date 
   ON finance_vouchers(showroom_id, voucher_date DESC);
 
--- General Ledger: Filtered by showroom and transaction date
-CREATE INDEX IF NOT EXISTS idx_general_ledger_showroom_date 
-  ON general_ledger(showroom_id, transaction_date DESC);
+-- Journal Entries: Filtered by showroom and entry date
+CREATE INDEX IF NOT EXISTS idx_journal_entries_showroom_date 
+  ON journal_entries(showroom_id, entry_date DESC);
 
 -- Dealership Documents: Filtered by showroom and sorted by creation date
 CREATE INDEX IF NOT EXISTS idx_documents_showroom_created 
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_approvals_showroom_status_created
 
 -- Audit Logs: Filtered by showroom and sorted by timestamp
 CREATE INDEX IF NOT EXISTS idx_audit_showroom_timestamp 
-  ON audit_logs(showroom_id, timestamp DESC);
+  ON audit_logs(showroom_id, created_at DESC);
 
 -- Notifications: Filtered by user and read status
 CREATE INDEX IF NOT EXISTS idx_notifications_user_unread 
@@ -66,12 +66,12 @@ CREATE INDEX IF NOT EXISTS idx_approvals_pending
 
 -- Active Bookings awaiting delivery / allotment
 CREATE INDEX IF NOT EXISTS idx_bookings_active 
-  ON bookings(showroom_id, booking_date DESC) 
-  WHERE booking_status IN ('confirmed', 'allotted');
+  ON bookings(showroom_id, created_at DESC) 
+  WHERE status IN ('confirmed', 'allocated');
 
 -- In-Stock Inventory lookup
 CREATE INDEX IF NOT EXISTS idx_inventory_in_stock 
-  ON inventory_items(showroom_id, model_id) 
+  ON inventory_vehicles(showroom_id, variant_id) 
   WHERE status = 'in_stock';
 
 -- ---------------------------------------------------------------------
@@ -80,14 +80,14 @@ CREATE INDEX IF NOT EXISTS idx_inventory_in_stock
 
 -- Fast VIN & Engine lookup on vehicle inventory
 CREATE INDEX IF NOT EXISTS idx_inventory_vin 
-  ON inventory_items(vin);
+  ON inventory_vehicles(vin);
 
 CREATE INDEX IF NOT EXISTS idx_inventory_engine 
-  ON inventory_items(engine_number);
+  ON inventory_vehicles(engine_number);
 
 -- Fast customer phone lookup for CRM / bookings
 CREATE INDEX IF NOT EXISTS idx_customers_phone 
-  ON customers(phone);
+  ON customers(mobile_primary);
 
 -- Invoice & Booking reference lookups
 CREATE INDEX IF NOT EXISTS idx_sales_invoices_no 
@@ -100,6 +100,6 @@ CREATE INDEX IF NOT EXISTS idx_bookings_no
 CREATE INDEX IF NOT EXISTS idx_documents_entity 
   ON dealership_documents(entity_type, entity_id);
 
--- General Ledger account code lookup
-CREATE INDEX IF NOT EXISTS idx_general_ledger_account 
-  ON general_ledger(account_id, transaction_date DESC);
+-- Journal entry lines account lookup
+CREATE INDEX IF NOT EXISTS idx_journal_lines_account 
+  ON journal_entry_lines(account_id);

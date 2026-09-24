@@ -146,11 +146,7 @@ CREATE POLICY "Allow admin manage on gst_tax_rates"
     ON public.gst_tax_rates FOR ALL
     TO authenticated
     USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE users.id = auth.uid()
-            AND users.role IN ('super_admin', 'finance_manager')
-        )
+        public.is_admin() OR public.has_permission(auth.uid(), 'settings', 'edit')
     );
 
 -- Showroom isolation for filing periods
@@ -158,13 +154,6 @@ CREATE POLICY "Showroom isolation for gst_filing_periods"
     ON public.gst_filing_periods FOR ALL
     TO authenticated
     USING (
-        showroom_id IN (
-            SELECT showroom_id FROM public.users
-            WHERE users.id = auth.uid()
-        )
-        OR EXISTS (
-            SELECT 1 FROM public.users
-            WHERE users.id = auth.uid()
-            AND users.role = 'super_admin'
-        )
+        public.is_admin()
+        OR showroom_id IN (SELECT get_user_showroom_ids(auth.uid()))
     );

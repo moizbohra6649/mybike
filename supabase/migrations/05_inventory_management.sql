@@ -3,6 +3,19 @@
 -- Vehicles as High-Value Serialized Assets (VIN, Engine, Motor, Battery Serial, PDI, Movements, Transfers)
 -- ============================================================================
 
+-- Ensure 2-argument has_permission overload and is_admin exist
+CREATE OR REPLACE FUNCTION public.has_permission(p_module VARCHAR, p_action VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN public.has_permission(auth.uid(), p_module, p_action);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+    SELECT public.is_super_admin(auth.uid()) OR public.has_role(auth.uid(), 'admin');
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- 1. Inventory Vehicles (Individual Serialized Units)
 CREATE TABLE IF NOT EXISTS public.inventory_vehicles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

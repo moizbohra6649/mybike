@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. Dealership Documents Table
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.dealership_documents (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     showroom_id UUID REFERENCES public.showrooms(id) ON DELETE CASCADE,
     entity_type VARCHAR(50) NOT NULL CHECK (entity_type IN ('customer', 'vehicle', 'booking', 'invoice', 'purchase', 'showroom', 'general')),
     entity_id VARCHAR(100) NOT NULL, -- e.g. customer_id, vin, booking_id, invoice_id

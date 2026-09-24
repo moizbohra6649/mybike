@@ -57,6 +57,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
+-- Check if current authenticated user has a specific module-action permission (2-arg convenience overload)
+CREATE OR REPLACE FUNCTION public.has_permission(p_module VARCHAR, p_action VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN public.has_permission(auth.uid(), p_module, p_action);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- Check if current authenticated user is an admin or super admin
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+    SELECT public.is_super_admin(auth.uid()) OR public.has_role(auth.uid(), 'admin');
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- Check if user has access to a specific showroom
 CREATE OR REPLACE FUNCTION public.user_has_showroom_access(p_user_id UUID, p_showroom_id UUID)
 RETURNS BOOLEAN AS $$
