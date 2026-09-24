@@ -311,13 +311,16 @@ class _DashboardView extends StatelessWidget {
             AppButton(
               label: 'New Customer Booking',
               leadingIcon: Icons.add,
-              onPressed: () => context.goNamed(RouteNames.bookingCreate),
+              // Was RouteNames.bookingCreate — a constant with no registered
+              // route, so goNamed threw and the button did nothing. The booking
+              // wizard is mounted at /sales/create (RouteNames.saleCreate).
+              onPressed: () => context.goNamed(RouteNames.saleCreate),
             ),
             AppButton(
               label: 'Vehicle Inwarding',
               leadingIcon: Icons.local_shipping_outlined,
               variant: AppButtonVariant.secondary,
-              onPressed: () => context.goNamed(RouteNames.inventory),
+              onPressed: () => context.goNamed(RouteNames.stockInward),
             ),
             AppButton(
               label: 'Record Financial Voucher',

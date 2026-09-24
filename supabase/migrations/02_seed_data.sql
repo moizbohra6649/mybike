@@ -127,7 +127,7 @@ ON CONFLICT (code) DO NOTHING;
 -- 6. Seed Global Application Settings
 INSERT INTO public.settings (key, value, description)
 VALUES 
-    ('app_name', '"MYBIKE"'::jsonb, 'Application Brand Name'),
+    ('app_name', '"MYBIKE ERP"'::jsonb, 'Application Brand Name'),
     ('currency_code', '"INR"'::jsonb, 'Primary Currency Code'),
     ('currency_symbol', '"₹"'::jsonb, 'Currency Symbol'),
     ('default_gst_rate', '18'::jsonb, 'Default GST percentage for accessories & parts'),

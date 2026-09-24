@@ -18,8 +18,8 @@ when Supabase is unreachable. Fine for UI work, but nothing is saved.
 
 1. Create a project at [supabase.com](https://supabase.com/dashboard) and copy
    **Project URL** and **anon public key** from *Settings → API*.
-2. Apply the schema: run `supabase/migrations/01…16` **in order** in the SQL
-   editor (or `supabase db push` with the CLI linked). They create the 41 tables
+2. Apply the schema: run `supabase/migrations/01…18` **in order** in the SQL
+   editor (or `supabase db push` with the CLI linked). They create the 44 tables
    and their RLS policies; `02_seed_data.sql` seeds roles and permissions.
 3. Create the first login — *Authentication → Users → Add user* in the
    dashboard, or the `supabase/functions/create-user` edge function. The account

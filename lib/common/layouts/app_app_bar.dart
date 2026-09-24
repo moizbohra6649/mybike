@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/routes/route_names.dart';
+import '../../core/services/auth_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimensions.dart';
@@ -455,11 +456,16 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ],
-            onSelected: (val) {
+            onSelected: (val) async {
               if (val == 'logout') {
+                // Sign out before navigating: leaving the session, permissions
+                // and showroom access in place meant the next login inherited
+                // the previous user's scope.
+                await AuthService.instance.signOut();
+                if (!context.mounted) return;
                 context.goNamed(RouteNames.login);
               } else if (val == 'settings') {
-                context.showSnackBar('Settings opened');
+                context.goNamed(RouteNames.settings);
               } else if (val == 'theme') {
                 context.read<ThemeCubit>().toggleTheme();
               } else if (val == 'search') {

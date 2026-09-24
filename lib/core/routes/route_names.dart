@@ -25,11 +25,10 @@ abstract final class RouteNames {
   static const String vehicles = 'vehicles';
   static const String vehicleDetail = 'vehicle-detail';
   static const String vehicleCreate = 'vehicle-create';
-  static const String brands = 'brands';
-  static const String models = 'models';
 
   // ─── Inventory ───
   static const String inventory = 'inventory';
+  static const String stockInward = 'inward';
   static const String stockTransfer = 'stock-transfer';
 
   // ─── Customers ───
@@ -54,8 +53,6 @@ abstract final class RouteNames {
 
   // ─── Bookings ───
   static const String bookings = 'bookings';
-  static const String bookingDetail = 'booking-detail';
-  static const String bookingCreate = 'booking-create';
 
   // ─── Finance ───
   static const String finance = 'finance';
@@ -71,7 +68,6 @@ abstract final class RouteNames {
   static const String chartOfAccounts = 'chart-of-accounts';
   static const String journal = 'journal';
   static const String journalCreate = 'journal-create';
-  static const String ledger = 'ledger';
   static const String trialBalance = 'trial-balance';
 
   // ─── Reports & Documents ───

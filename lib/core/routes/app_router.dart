@@ -27,6 +27,12 @@ import '../../features/customers/presentation/screens/customer_form_screen.dart'
 import '../../features/customers/presentation/screens/customer_detail_screen.dart';
 import '../../features/customers/presentation/screens/lead_pipeline_screen.dart';
 import '../../features/customers/presentation/screens/booking_list_screen.dart';
+import '../../features/suppliers/presentation/screens/supplier_list_screen.dart';
+import '../../features/suppliers/presentation/screens/supplier_form_screen.dart';
+import '../../features/suppliers/presentation/screens/supplier_detail_screen.dart';
+import '../../features/purchases/presentation/screens/purchase_order_list_screen.dart';
+import '../../features/purchases/presentation/screens/purchase_order_form_screen.dart';
+import '../../features/purchases/presentation/screens/purchase_order_detail_screen.dart';
 import '../../features/sales/presentation/screens/sales_invoice_list_screen.dart';
 import '../../features/sales/presentation/screens/sales_invoice_detail_screen.dart';
 import '../../features/sales/presentation/screens/booking_wizard_screen.dart';
@@ -50,6 +56,7 @@ import '../../features/notifications/presentation/screens/notification_center_sc
 import '../../features/documents/presentation/screens/document_dms_hub_screen.dart';
 import '../../features/audit/presentation/screens/audit_trail_screen.dart';
 import '../../features/approvals/presentation/screens/approval_hub_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../common/components/app_error_state.dart';
 
 /// MYBIKE Router Configuration
@@ -214,6 +221,7 @@ class AppRouter {
     ),
     GoRoute(
       path: '/inventory/inward',
+      name: RouteNames.stockInward,
       builder: (context, state) => const StockInwardScreen(),
     ),
     GoRoute(
@@ -289,6 +297,52 @@ class AppRouter {
       builder: (context, state) {
         final invoiceId = state.pathParameters['invoiceId']!;
         return DeliveryChallanScreen(invoiceId: invoiceId);
+      },
+    ),
+
+    // ─── Procurement: Suppliers ───
+    GoRoute(
+      path: '/suppliers',
+      name: RouteNames.suppliers,
+      builder: (context, state) => const SupplierListScreen(),
+    ),
+    GoRoute(
+      path: '/suppliers/create',
+      name: RouteNames.supplierCreate,
+      builder: (context, state) {
+        final editId = state.uri.queryParameters['editId'];
+        return SupplierFormScreen(editSupplierId: editId);
+      },
+    ),
+    GoRoute(
+      path: '/suppliers/:supplierId',
+      name: RouteNames.supplierDetail,
+      builder: (context, state) {
+        final supplierId = state.pathParameters['supplierId']!;
+        return SupplierDetailScreen(supplierId: supplierId);
+      },
+    ),
+
+    // ─── Procurement: Purchase Orders ───
+    GoRoute(
+      path: '/purchases',
+      name: RouteNames.purchases,
+      builder: (context, state) => const PurchaseOrderListScreen(),
+    ),
+    GoRoute(
+      path: '/purchases/create',
+      name: RouteNames.purchaseCreate,
+      builder: (context, state) {
+        final editId = state.uri.queryParameters['editId'];
+        return PurchaseOrderFormScreen(editPurchaseId: editId);
+      },
+    ),
+    GoRoute(
+      path: '/purchases/:purchaseId',
+      name: RouteNames.purchaseDetail,
+      builder: (context, state) {
+        final purchaseId = state.pathParameters['purchaseId']!;
+        return PurchaseOrderDetailScreen(purchaseId: purchaseId);
       },
     ),
 
@@ -432,6 +486,13 @@ class AppRouter {
       path: '/approvals',
       name: RouteNames.approvals,
       builder: (context, state) => const ApprovalHubScreen(),
+    ),
+
+    // ─── Administration ───
+    GoRoute(
+      path: '/settings',
+      name: RouteNames.settings,
+      builder: (context, state) => const SettingsScreen(),
     ),
   ];
 }

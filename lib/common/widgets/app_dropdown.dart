@@ -38,6 +38,9 @@ class AppDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
+    // Mirrors AppDatePicker: the clear affordance only exists when there is
+    // something to clear, so an empty or disabled field keeps its plain caret.
+    final showClear = isClearable && value != null && enabled && onChanged != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,11 +73,13 @@ class AppDropdown<T> extends StatelessWidget {
         DropdownButtonFormField<T>(
           initialValue: value,
           isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
-            size: AppDimensions.iconMd,
-          ),
+          icon: showClear
+              ? const SizedBox.shrink()
+              : Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
+                  size: AppDimensions.iconMd,
+                ),
           dropdownColor: isDark ? AppColors.darkCard : AppColors.lightCard,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           style: AppTypography.bodyMedium.copyWith(
@@ -88,6 +93,33 @@ class AppDropdown<T> extends StatelessWidget {
                     prefixIcon,
                     color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
                     size: AppDimensions.iconSm,
+                  )
+                : null,
+            // The clear button takes over the dropdown's own caret slot, so
+            // the caret is re-drawn beside it to keep the affordance visible.
+            suffixIcon: showClear
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: AppDimensions.iconSm),
+                        color: isDark
+                            ? AppColors.darkSecondaryText
+                            : AppColors.lightSecondaryText,
+                        onPressed: () => onChanged!(null),
+                        tooltip: 'Clear selection',
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppDimensions.spacing12),
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: isDark
+                              ? AppColors.darkSecondaryText
+                              : AppColors.lightSecondaryText,
+                          size: AppDimensions.iconMd,
+                        ),
+                      ),
+                    ],
                   )
                 : null,
             contentPadding: const EdgeInsets.symmetric(

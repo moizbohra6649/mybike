@@ -3,6 +3,16 @@
 -- Migration: 13_audit_trail_enhancements.sql
 -- ============================================================================
 
+-- 0. is_admin() — called by the RLS policies here and in 14, 17 and 18, but it
+-- was never defined, so each of those CREATE POLICY statements failed on a
+-- fresh database. Defined here, ahead of its first caller, rather than in 03,
+-- because 03 cannot be re-run on a database that already has its policies.
+-- Same meaning as user_has_showroom_access(): super admin or admin role.
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+    SELECT public.is_super_admin(auth.uid()) OR public.has_role(auth.uid(), 'admin');
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- 1. Enhance audit_logs table with user details, human-readable record titles, and severity
 ALTER TABLE public.audit_logs
     ADD COLUMN IF NOT EXISTS user_name VARCHAR(150),

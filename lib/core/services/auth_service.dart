@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/supabase_config.dart';
 import '../constants/storage_constants.dart';
+import 'permission_service.dart';
+import 'showroom_service.dart';
 import 'supabase_service.dart';
 import '../../features/auth/domain/entities/user_profile.dart';
 import '../../features/auth/data/models/user_profile_model.dart';
@@ -185,6 +187,12 @@ class AuthService {
   }
 
   /// Sign Out
+  ///
+  /// Also clears the two singletons that hold state derived from the session.
+  /// Without this, signing out left `PermissionService` and `ShowroomService`
+  /// populated with the previous user's permissions and showroom access, so the
+  /// next login inherited them — and every caller of signOut() had to remember
+  /// to clear them itself.
   Future<void> signOut() async {
     if (SupabaseConfig.isConfigured && SupabaseService.client != null) {
       try {
@@ -193,6 +201,9 @@ class AuthService {
         debugPrint('Supabase sign out error: $e');
       }
     }
+
+    PermissionService.instance.clear();
+    await ShowroomService.instance.clear();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(StorageConstants.userId);
