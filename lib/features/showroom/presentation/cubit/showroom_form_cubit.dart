@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/showroom_management_service.dart';
-import '../../domain/entities/showroom_entity.dart';
 import 'showroom_form_state.dart';
 
 /// Cubit managing showroom creation, editing, and statutory validations

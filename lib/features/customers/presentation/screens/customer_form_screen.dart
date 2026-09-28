@@ -8,6 +8,7 @@ import '../../../../core/extensions/context_extensions.dart';
 import '../../../../common/layouts/app_scaffold.dart';
 import '../../../../common/loaders/app_loading.dart';
 import '../../../../common/loaders/app_skeleton.dart';
+import '../../../../common/widgets/app_dropdown.dart';
 import '../cubit/customer_form_cubit.dart';
 import '../cubit/customer_form_state.dart';
 
@@ -389,29 +390,14 @@ class _DropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
+    return AppDropdown<String>(
+      label: label,
+      value: value,
+      items: items.keys.toList(),
+      itemLabel: (k) => items[k] ?? k,
       onChanged: (v) {
         if (v != null) onChanged(v);
       },
-      items: items.entries
-          .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
-          .toList(),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: AppTypography.captionLarge.copyWith(
-          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-        ),
-        isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-        ),
-      ),
     );
   }
 }

@@ -8,13 +8,17 @@ import '../../features/sales/domain/entities/payment_receipt_entity.dart';
 import '../../features/sales/domain/entities/delivery_challan_entity.dart';
 import '../../features/sales/domain/entities/gate_pass_entity.dart';
 import '../../features/sales/data/models/sales_invoice_model.dart';
+import '../../features/sales/data/models/payment_receipt_model.dart';
+import '../../features/sales/data/models/delivery_challan_model.dart';
+import '../../features/sales/data/models/gate_pass_model.dart';
+import '../../features/sales/data/models/invoice_item_model.dart';
 import 'inventory_management_service.dart';
 import 'customer_management_service.dart';
 
 /// Sales Management Service
 ///
 /// Handles all dealership sales, GST tax invoicing, payment receipts,
-/// delivery challans, and gate passes.
+/// delivery challans, and gate passes with direct Supabase CRUD persistence.
 class SalesManagementService {
   SalesManagementService._();
   static final SalesManagementService instance = SalesManagementService._();
@@ -23,424 +27,113 @@ class SalesManagementService {
       SupabaseConfig.isConfigured && SupabaseService.client != null;
 
   // ═══════════════════════════════════════════════════════════════════
-  // DEV MODE SEED DATA
-  // ═══════════════════════════════════════════════════════════════════
-
-  static final DateTime _now = DateTime.now();
-  static final DateTime _twoDaysAgo = _now.subtract(const Duration(days: 2));
-  static final DateTime _fiveDaysAgo = _now.subtract(const Duration(days: 5));
-
-  static const String _mumbaiId = 'showroom-mumbai-main';
-  static const String _puneId = 'showroom-pune-west';
-  static const String _bangaloreId = 'showroom-bangalore-metro';
-
-  static final List<SalesInvoiceEntity> _devInvoices = [
-    // 1. Honda CB350 (Petrol - 28% GST) - Mumbai - Delivered
-    SalesInvoiceEntity(
-      id: 'inv-001',
-      showroomId: _mumbaiId,
-      customerId: 'cust-001',
-      bookingId: 'booking-001',
-      vehicleInventoryId: 'inv-cb350-001',
-      invoiceNumber: 'IND-MUM-INV-00184',
-      invoiceDate: _fiveDaysAgo,
-      variantId: 'variant-cb350-dlx-pro',
-      colorId: 'color-cb350-red',
-      vin: 'ME4NC5800N8000101',
-      engineNumber: 'NC58E-1002341',
-      keyNumber: 'KEY-MUM-01',
-      hsnCode: '8711',
-      gstRate: 28.0,
-      isInterstate: false,
-      exShowroomPrice: 217800.0,
-      discountAmount: 2000.0,
-      taxableAmount: 168593.75,
-      cgstAmount: 23603.13,
-      sgstAmount: 23603.12,
-      rtoCharges: 21500.0,
-      insuranceCharges: 12400.0,
-      accessoriesTotal: 4500.0,
-      extendedWarrantyAmount: 2800.0,
-      fastagCharges: 500.0,
-      hypothecationCharges: 1500.0,
-      roundOff: 0.0,
-      totalOnRoadPrice: 258500.0,
-      bookingAdvanceAdjusted: 5000.0,
-      financeAmount: 180000.0,
-      financeBank: 'HDFC Bank Auto Loan',
-      exchangeAllowance: 25000.0,
-      amountPaid: 258500.0,
-      balanceAmount: 0.0,
-      paymentStatus: 'paid',
-      status: 'delivered',
-      issuedBy: 'staff-rahul-001',
-      createdAt: _fiveDaysAgo,
-      updatedAt: _fiveDaysAgo,
-      customerName: 'Rajesh Sharma',
-      customerMobile: '9876543210',
-      modelName: 'Honda CB350',
-      variantName: 'DLX Pro',
-      colorName: 'Precious Red Metallic',
-      showroomName: 'Mumbai Flagship',
-    ),
-    // 2. Ather 450X (EV - 5% GST) - Pune - Delivered
-    SalesInvoiceEntity(
-      id: 'inv-002',
-      showroomId: _puneId,
-      customerId: 'cust-003',
-      bookingId: 'booking-003',
-      vehicleInventoryId: 'inv-ather-001',
-      invoiceNumber: 'IND-PUN-INV-00042',
-      invoiceDate: _twoDaysAgo,
-      variantId: 'variant-ather-450x-pro',
-      colorId: 'color-ather-white',
-      vin: 'MALJA450XN0000103',
-      motorNumber: 'ATH-MTR-64-001',
-      batterySerialNumber: 'ATH-BAT-37-9001',
-      keyNumber: 'KEY-PUN-03',
-      hsnCode: '8711',
-      gstRate: 5.0,
-      isInterstate: false,
-      exShowroomPrice: 154999.0,
-      discountAmount: 0.0,
-      taxableAmount: 147618.10,
-      cgstAmount: 3690.45,
-      sgstAmount: 3690.45,
-      rtoCharges: 2500.0, // EV road tax exemption subsidy
-      insuranceCharges: 8500.0,
-      accessoriesTotal: 3200.0,
-      extendedWarrantyAmount: 3999.0,
-      fastagCharges: 0.0,
-      hypothecationCharges: 0.0,
-      roundOff: 0.0,
-      totalOnRoadPrice: 173198.0,
-      bookingAdvanceAdjusted: 5000.0,
-      financeAmount: 0.0,
-      exchangeAllowance: 0.0,
-      amountPaid: 173198.0,
-      balanceAmount: 0.0,
-      paymentStatus: 'paid',
-      status: 'delivered',
-      issuedBy: 'staff-amit-003',
-      createdAt: _twoDaysAgo,
-      updatedAt: _twoDaysAgo,
-      customerName: 'Amit Kulkarni',
-      customerMobile: '9822012345',
-      modelName: 'Ather 450X',
-      variantName: '3.7 Pro',
-      colorName: 'Space Grey',
-      showroomName: 'Pune West Hub',
-    ),
-    // 3. TVS Apache RTR 310 - Mumbai - Issued (Pending Delivery)
-    SalesInvoiceEntity(
-      id: 'inv-003',
-      showroomId: _mumbaiId,
-      customerId: 'cust-002',
-      bookingId: 'booking-002',
-      invoiceNumber: 'IND-MUM-INV-00185',
-      invoiceDate: _now,
-      variantId: 'variant-apache-rtr-310-bto',
-      colorId: 'color-cb350-red',
-      vin: 'ME4NC5800N8000102',
-      engineNumber: 'RTR310E-99881',
-      keyNumber: 'KEY-MUM-02',
-      hsnCode: '8711',
-      gstRate: 28.0,
-      isInterstate: false,
-      exShowroomPrice: 272000.0,
-      discountAmount: 5000.0,
-      taxableAmount: 208593.75,
-      cgstAmount: 29203.13,
-      sgstAmount: 29203.12,
-      rtoCharges: 26800.0,
-      insuranceCharges: 14500.0,
-      accessoriesTotal: 6500.0,
-      extendedWarrantyAmount: 3500.0,
-      fastagCharges: 500.0,
-      hypothecationCharges: 1500.0,
-      roundOff: 0.0,
-      totalOnRoadPrice: 320300.0,
-      bookingAdvanceAdjusted: 10000.0,
-      financeAmount: 220000.0,
-      financeBank: 'State Bank of India',
-      exchangeAllowance: 0.0,
-      amountPaid: 320300.0,
-      balanceAmount: 0.0,
-      paymentStatus: 'paid',
-      status: 'issued',
-      issuedBy: 'staff-rahul-001',
-      createdAt: _now,
-      updatedAt: _now,
-      customerName: 'Priya Deshmukh',
-      customerMobile: '9876543212',
-      modelName: 'TVS Apache RTR 310',
-      variantName: 'BTO Dynamic',
-      colorName: 'Arsenal Black',
-      showroomName: 'Mumbai Flagship',
-    ),
-    // 4. Ather Rizta Z - Bangalore - Draft
-    SalesInvoiceEntity(
-      id: 'inv-004',
-      showroomId: _bangaloreId,
-      customerId: 'cust-004',
-      invoiceNumber: 'IND-BLR-INV-00012',
-      invoiceDate: _now,
-      variantId: 'variant-ather-rizta-z',
-      colorId: 'color-rizta-blue',
-      vin: 'MALJA450XN0000104',
-      motorNumber: 'ATH-MTR-RZ-102',
-      batterySerialNumber: 'ATH-BAT-RZ-881',
-      keyNumber: 'KEY-BLR-04',
-      hsnCode: '8711',
-      gstRate: 5.0,
-      isInterstate: false,
-      exShowroomPrice: 144999.0,
-      discountAmount: 0.0,
-      taxableAmount: 138094.28,
-      cgstAmount: 3452.36,
-      sgstAmount: 3452.36,
-      rtoCharges: 2500.0,
-      insuranceCharges: 7900.0,
-      accessoriesTotal: 2500.0,
-      extendedWarrantyAmount: 3200.0,
-      fastagCharges: 0.0,
-      hypothecationCharges: 0.0,
-      roundOff: 0.0,
-      totalOnRoadPrice: 161099.0,
-      bookingAdvanceAdjusted: 5000.0,
-      financeAmount: 100000.0,
-      financeBank: 'ICICI Bank',
-      exchangeAllowance: 0.0,
-      amountPaid: 5000.0,
-      balanceAmount: 156099.0,
-      paymentStatus: 'partial',
-      status: 'draft',
-      issuedBy: 'staff-priya-002',
-      createdAt: _now,
-      updatedAt: _now,
-      customerName: 'Karthik Rajan',
-      customerMobile: '9845012345',
-      modelName: 'Ather Rizta',
-      variantName: 'Rizta Z 3.7',
-      colorName: 'Pangong Blue',
-      showroomName: 'Bangalore Metro',
-    ),
-  ];
-
-  static final List<DeliveryChallanEntity> _devChallans = [
-    DeliveryChallanEntity(
-      id: 'dc-001',
-      showroomId: _mumbaiId,
-      invoiceId: 'inv-001',
-      challanNumber: 'IND-MUM-DC-00041',
-      challanDate: _fiveDaysAgo,
-      allocatedVin: 'ME4NC5800N8000101',
-      odometerReadingKm: 3.5,
-      fuelLevel: '5 Litres',
-      helmetProvided: true,
-      toolkitProvided: true,
-      firstAidKitProvided: true,
-      ownerManualProvided: true,
-      spareKeysCount: 2,
-      pdiFormSigned: true,
-      customerAcceptanceSigned: true,
-      deliveredBy: 'staff-rahul-001',
-      receivedByName: 'Rajesh Sharma',
-      receivedByRelationship: 'self',
-      createdAt: _fiveDaysAgo,
-      invoiceNumber: 'IND-MUM-INV-00184',
-      customerName: 'Rajesh Sharma',
-      modelName: 'Honda CB350',
-      variantName: 'DLX Pro',
-      colorName: 'Precious Red Metallic',
-    ),
-    DeliveryChallanEntity(
-      id: 'dc-002',
-      showroomId: _puneId,
-      invoiceId: 'inv-002',
-      challanNumber: 'IND-PUN-DC-00019',
-      challanDate: _twoDaysAgo,
-      allocatedVin: 'MALJA450XN0000103',
-      odometerReadingKm: 2.1,
-      batterySocPercent: 98.0,
-      helmetProvided: true,
-      toolkitProvided: true,
-      firstAidKitProvided: true,
-      ownerManualProvided: true,
-      spareKeysCount: 2,
-      batteryChargerSerial: 'ATH-CHG-3300-881',
-      pdiFormSigned: true,
-      customerAcceptanceSigned: true,
-      deliveredBy: 'staff-amit-003',
-      receivedByName: 'Amit Kulkarni',
-      receivedByRelationship: 'self',
-      createdAt: _twoDaysAgo,
-      invoiceNumber: 'IND-PUN-INV-00042',
-      customerName: 'Amit Kulkarni',
-      modelName: 'Ather 450X',
-      variantName: '3.7 Pro',
-      colorName: 'Space Grey',
-    ),
-  ];
-
-  static final List<GatePassEntity> _devGatePasses = [
-    GatePassEntity(
-      id: 'gp-001',
-      showroomId: _mumbaiId,
-      challanId: 'dc-001',
-      invoiceId: 'inv-001',
-      gatePassNumber: 'IND-MUM-GP-00041',
-      issuedAt: _fiveDaysAgo,
-      vin: 'ME4NC5800N8000101',
-      customerName: 'Rajesh Sharma',
-      authorizedBy: 'staff-rahul-001',
-      authorizedByName: 'Rahul Sharma (Manager)',
-      securityGuardName: 'Ramesh Gate 1',
-      vehicleDepartedAt: _fiveDaysAgo.add(const Duration(minutes: 15)),
-      status: 'departed',
-      createdAt: _fiveDaysAgo,
-    ),
-    GatePassEntity(
-      id: 'gp-002',
-      showroomId: _puneId,
-      challanId: 'dc-002',
-      invoiceId: 'inv-002',
-      gatePassNumber: 'IND-PUN-GP-00019',
-      issuedAt: _twoDaysAgo,
-      vin: 'MALJA450XN0000103',
-      customerName: 'Amit Kulkarni',
-      authorizedBy: 'staff-amit-003',
-      authorizedByName: 'Amit Joshi (Manager)',
-      securityGuardName: 'Ganesh West Gate',
-      vehicleDepartedAt: _twoDaysAgo.add(const Duration(minutes: 20)),
-      status: 'departed',
-      createdAt: _twoDaysAgo,
-    ),
-  ];
-
-  static final List<PaymentReceiptEntity> _devReceipts = [
-    PaymentReceiptEntity(
-      id: 'rcp-001',
-      showroomId: _mumbaiId,
-      customerId: 'cust-001',
-      invoiceId: 'inv-001',
-      receiptNumber: 'IND-MUM-RCP-00051',
-      receiptDate: _fiveDaysAgo,
-      amount: 48500.0,
-      paymentMode: 'upi',
-      paymentReference: 'UPI-HDFC-998822',
-      bankName: 'HDFC Bank',
-      collectedBy: 'staff-rahul-001',
-      createdAt: _fiveDaysAgo,
-      customerName: 'Rajesh Sharma',
-    ),
-    PaymentReceiptEntity(
-      id: 'rcp-002',
-      showroomId: _mumbaiId,
-      customerId: 'cust-001',
-      invoiceId: 'inv-001',
-      receiptNumber: 'IND-MUM-RCP-00052',
-      receiptDate: _fiveDaysAgo,
-      amount: 180000.0,
-      paymentMode: 'finance_disbursement',
-      paymentReference: 'LOAN-HDFC-771120',
-      bankName: 'HDFC Auto Finance',
-      collectedBy: 'staff-rahul-001',
-      createdAt: _fiveDaysAgo,
-      customerName: 'Rajesh Sharma',
-    ),
-  ];
-
-  // Mutable copies for dev mode operations
-  late List<SalesInvoiceEntity> _invoices = List.from(_devInvoices);
-  late List<DeliveryChallanEntity> _challans = List.from(_devChallans);
-  late List<GatePassEntity> _gatePasses = List.from(_devGatePasses);
-  late List<PaymentReceiptEntity> _receipts = List.from(_devReceipts);
-  late List<InvoiceItemEntity> _invoiceItems = [];
-  int _invoiceSeq = 186;
-  int _challanSeq = 43;
-  int _gatePassSeq = 43;
-  int _receiptSeq = 53;
-
-  /// Reset in-memory dev data (used for testing)
-  void resetDevData() {
-    _invoices = List.from(_devInvoices);
-    _challans = List.from(_devChallans);
-    _gatePasses = List.from(_devGatePasses);
-    _receipts = List.from(_devReceipts);
-    _invoiceItems = [];
-    _invoiceSeq = 186;
-    _challanSeq = 43;
-    _gatePassSeq = 43;
-    _receiptSeq = 53;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
   // INVOICE OPERATIONS
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch invoices with optional filters
+  /// Fetch invoices with optional filters directly from Supabase
   Future<List<SalesInvoiceEntity>> fetchInvoices({
     String? showroomId,
     String? status,
     String? search,
   }) async {
-    if (!_isSupabaseLive) {
-      await SupabaseService.devLatency();
-      return _fetchDevInvoices(showroomId: showroomId, status: status, search: search);
-    }
+    if (!_isSupabaseLive) return [];
+
     try {
-      var query = SupabaseService.client!.from('sales_invoices').select();
-      if (showroomId != null) query = query.eq('showroom_id', showroomId);
-      if (status != null) query = query.eq('status', status);
+      var query = SupabaseService.client!.from('sales_invoices').select(
+        '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
+      );
+      if (showroomId != null && showroomId.isNotEmpty) {
+        query = query.eq('showroom_id', showroomId);
+      }
+      if (status != null && status.isNotEmpty && status != 'all') {
+        query = query.eq('status', status);
+      }
       final response = await query.order('created_at', ascending: false);
-      final results = (response as List).map((e) => SalesInvoiceModel.fromJson(e as Map<String, dynamic>)).toList();
-      if (search != null && search.isNotEmpty) {
-        final s = search.toLowerCase();
+      final rawList = response as List;
+
+      final results = rawList.map((e) {
+        final row = Map<String, dynamic>.from(e as Map);
+        // Hydrate joined relation names into flat model attributes
+        final cust = row['customers'] as Map<String, dynamic>?;
+        if (cust != null) {
+          row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+          row['customer_mobile'] = cust['mobile_primary'];
+        }
+        final variant = row['vehicle_variants'] as Map<String, dynamic>?;
+        if (variant != null) {
+          row['variant_name'] = variant['name'];
+          final model = variant['vehicle_models'] as Map<String, dynamic>?;
+          if (model != null) {
+            row['model_name'] = model['name'];
+          }
+        }
+        final color = row['vehicle_colors'] as Map<String, dynamic>?;
+        if (color != null) {
+          row['color_name'] = color['name'];
+        }
+        final showroom = row['showrooms'] as Map<String, dynamic>?;
+        if (showroom != null) {
+          row['showroom_name'] = showroom['name'];
+        }
+        return SalesInvoiceModel.fromJson(row);
+      }).toList();
+
+      if (search != null && search.trim().isNotEmpty) {
+        final s = search.trim().toLowerCase();
         return results.where((inv) =>
             inv.invoiceNumber.toLowerCase().contains(s) ||
             inv.vin.toLowerCase().contains(s) ||
-            (inv.customerName?.toLowerCase().contains(s) ?? false)).toList();
+            (inv.customerName?.toLowerCase().contains(s) ?? false) ||
+            (inv.customerMobile?.contains(s) ?? false)).toList();
       }
       return results;
     } catch (e) {
       debugPrint('SalesManagementService.fetchInvoices error: $e');
-      return _fetchDevInvoices(showroomId: showroomId, status: status, search: search);
+      return [];
     }
-  }
-
-  List<SalesInvoiceEntity> _fetchDevInvoices({
-    String? showroomId,
-    String? status,
-    String? search,
-  }) {
-    var result = List<SalesInvoiceEntity>.from(_invoices);
-    if (showroomId != null) result = result.where((i) => i.showroomId == showroomId).toList();
-    if (status != null) result = result.where((i) => i.status == status).toList();
-    if (search != null && search.isNotEmpty) {
-      final s = search.toLowerCase();
-      result = result.where((i) =>
-          i.invoiceNumber.toLowerCase().contains(s) ||
-          i.vin.toLowerCase().contains(s) ||
-          (i.customerName?.toLowerCase().contains(s) ?? false) ||
-          (i.customerMobile?.contains(s) ?? false)).toList();
-    }
-    return result;
   }
 
   /// Fetch a single invoice by ID
   Future<SalesInvoiceEntity?> fetchInvoiceById(String id) async {
-    if (!_isSupabaseLive) {
-      await SupabaseService.devLatency();
-      return _invoices.cast<SalesInvoiceEntity?>().firstWhere((i) => i!.id == id, orElse: () => null);
-    }
+    if (!_isSupabaseLive) return null;
+
     try {
-      final response = await SupabaseService.client!.from('sales_invoices').select().eq('id', id).maybeSingle();
+      final response = await SupabaseService.client!
+          .from('sales_invoices')
+          .select(
+            '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
+          )
+          .eq('id', id)
+          .maybeSingle();
+
       if (response == null) return null;
-      return SalesInvoiceModel.fromJson(response);
+
+      final row = Map<String, dynamic>.from(response);
+      final cust = row['customers'] as Map<String, dynamic>?;
+      if (cust != null) {
+        row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+        row['customer_mobile'] = cust['mobile_primary'];
+      }
+      final variant = row['vehicle_variants'] as Map<String, dynamic>?;
+      if (variant != null) {
+        row['variant_name'] = variant['name'];
+        final model = variant['vehicle_models'] as Map<String, dynamic>?;
+        if (model != null) {
+          row['model_name'] = model['name'];
+        }
+      }
+      final color = row['vehicle_colors'] as Map<String, dynamic>?;
+      if (color != null) {
+        row['color_name'] = color['name'];
+      }
+      final showroom = row['showrooms'] as Map<String, dynamic>?;
+      if (showroom != null) {
+        row['showroom_name'] = showroom['name'];
+      }
+      return SalesInvoiceModel.fromJson(row);
     } catch (e) {
       debugPrint('SalesManagementService.fetchInvoiceById error: $e');
-      return _invoices.cast<SalesInvoiceEntity?>().firstWhere((i) => i!.id == id, orElse: () => null);
+      return null;
     }
   }
 
@@ -449,45 +142,59 @@ class SalesManagementService {
     SalesInvoiceEntity invoice, {
     List<InvoiceItemEntity>? items,
   }) async {
-    final invoiceNumber = invoice.invoiceNumber.isNotEmpty
-        ? invoice.invoiceNumber
-        : 'INV-DEV-${_invoiceSeq.toString().padLeft(5, '0')}';
-    _invoiceSeq++;
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
+    }
 
-    final newInvoice = invoice.copyWith(
-      id: 'inv-${DateTime.now().millisecondsSinceEpoch}',
-      invoiceNumber: invoiceNumber,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+    final payload = SalesInvoiceModel.toInsertJson(invoice);
+    if (payload['invoice_number'] == null || (payload['invoice_number'] as String).isEmpty) {
+      payload['invoice_number'] = 'INV-${DateTime.now().millisecondsSinceEpoch}';
+    }
 
-    _invoices.insert(0, newInvoice);
+    final response = await SupabaseService.client!
+        .from('sales_invoices')
+        .insert(payload)
+        .select()
+        .single();
+
+    final created = SalesInvoiceModel.fromJson(response);
 
     // Track vehicle line item
-    final vehicleItem = InvoiceItemEntity(
-      id: 'item-${DateTime.now().millisecondsSinceEpoch}',
-      invoiceId: newInvoice.id,
-      itemType: 'vehicle',
-      description: '${newInvoice.modelName ?? "Vehicle"} ${newInvoice.variantName ?? ""}'.trim(),
-      hsnSacCode: newInvoice.hsnCode,
-      quantity: 1,
-      unitPrice: newInvoice.taxableAmount,
-      taxableAmount: newInvoice.taxableAmount,
-      gstRate: newInvoice.gstRate,
-      taxAmount: newInvoice.totalGst,
-      totalAmount: newInvoice.taxableAmount + newInvoice.totalGst,
-      createdAt: DateTime.now(),
-    );
-    _invoiceItems.add(vehicleItem);
-    if (items != null) {
-      _invoiceItems.addAll(items);
+    final vehicleItemMap = {
+      'invoice_id': created.id,
+      'item_type': 'vehicle',
+      'description': '${invoice.modelName ?? "Vehicle"} ${invoice.variantName ?? ""}'.trim(),
+      'hsn_sac_code': invoice.hsnCode,
+      'quantity': 1,
+      'unit_price': invoice.taxableAmount,
+      'taxable_amount': invoice.taxableAmount,
+      'gst_rate': invoice.gstRate,
+      'tax_amount': invoice.totalGst,
+      'total_amount': invoice.taxableAmount + invoice.totalGst,
+    };
+
+    try {
+      await SupabaseService.client!.from('invoice_items').insert(vehicleItemMap);
+
+      if (items != null && items.isNotEmpty) {
+        final lineItemsPayload = items.map((i) {
+          final m = InvoiceItemModel.toJson(i);
+          m.remove('id');
+          m.remove('created_at');
+          m['invoice_id'] = created.id;
+          return m;
+        }).toList();
+        await SupabaseService.client!.from('invoice_items').insert(lineItemsPayload);
+      }
+    } catch (e) {
+      debugPrint('Invoice line items insertion note: $e');
     }
 
     // If linked to a booking, mark the booking as confirmed / invoiced
-    if (newInvoice.bookingId != null) {
+    if (invoice.bookingId != null) {
       try {
         await CustomerManagementService.instance.updateBookingStatus(
-          newInvoice.bookingId!,
+          invoice.bookingId!,
           'confirmed',
         );
       } catch (e) {
@@ -495,148 +202,235 @@ class SalesManagementService {
       }
     }
 
-    if (_isSupabaseLive) {
-      try {
-        await SupabaseService.client!
-            .from('sales_invoices')
-            .insert(SalesInvoiceModel.toInsertJson(newInvoice));
-      } catch (e) {
-        debugPrint('Supabase createInvoice error: $e');
-      }
+    return created;
+  }
+
+  /// Update invoice state
+  Future<SalesInvoiceEntity> updateInvoiceStatus(String id, String status) async {
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
     }
 
-    return newInvoice;
+    final response = await SupabaseService.client!
+        .from('sales_invoices')
+        .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
+        .eq('id', id)
+        .select()
+        .single();
+
+    return SalesInvoiceModel.fromJson(response);
   }
 
   // ═══════════════════════════════════════════════════════════════════
   // PAYMENT RECEIPTS
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch payment receipts
+  void resetDevData() {}
+
+  /// Alias for createReceipt for lifecycle callers
+  Future<PaymentReceiptEntity> recordPaymentReceipt(PaymentReceiptEntity receipt) =>
+      createReceipt(receipt);
+
+  /// Fetch payment receipts directly from Supabase
   Future<List<PaymentReceiptEntity>> fetchReceipts({String? invoiceId, String? showroomId}) async {
-    await SupabaseService.devLatency();
-    var result = List<PaymentReceiptEntity>.from(_receipts);
-    if (invoiceId != null) result = result.where((r) => r.invoiceId == invoiceId).toList();
-    if (showroomId != null) result = result.where((r) => r.showroomId == showroomId).toList();
-    return result;
+    if (!_isSupabaseLive) return [];
+
+    try {
+      var query = SupabaseService.client!.from('payment_receipts').select('*, customers(first_name, last_name)');
+      if (invoiceId != null && invoiceId.isNotEmpty) {
+        query = query.eq('invoice_id', invoiceId);
+      }
+      if (showroomId != null && showroomId.isNotEmpty) {
+        query = query.eq('showroom_id', showroomId);
+      }
+      final response = await query.order('created_at', ascending: false);
+      final rawList = response as List;
+
+      return rawList.map((e) {
+        final row = Map<String, dynamic>.from(e as Map);
+        final cust = row['customers'] as Map<String, dynamic>?;
+        if (cust != null) {
+          row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+        }
+        return PaymentReceiptModel.fromJson(row);
+      }).toList();
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchReceipts error: $e');
+      return [];
+    }
   }
 
-  /// Record payment receipt and adjust balance on invoice
-  Future<PaymentReceiptEntity> recordPaymentReceipt(PaymentReceiptEntity receipt) async {
-    final receiptNumber = 'RCP-DEV-${_receiptSeq.toString().padLeft(5, '0')}';
-    _receiptSeq++;
+  /// Create and persist a payment receipt against an invoice
+  Future<PaymentReceiptEntity> createReceipt(PaymentReceiptEntity receipt) async {
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
+    }
 
-    final newReceipt = PaymentReceiptEntity(
-      id: 'rcp-${DateTime.now().millisecondsSinceEpoch}',
-      showroomId: receipt.showroomId,
-      customerId: receipt.customerId,
-      invoiceId: receipt.invoiceId,
-      bookingId: receipt.bookingId,
-      receiptNumber: receiptNumber,
-      receiptDate: DateTime.now(),
-      amount: receipt.amount,
-      paymentMode: receipt.paymentMode,
-      paymentReference: receipt.paymentReference,
-      bankName: receipt.bankName,
-      collectedBy: receipt.collectedBy,
-      notes: receipt.notes,
-      createdAt: DateTime.now(),
-      customerName: receipt.customerName,
-    );
+    final payload = PaymentReceiptModel.toJson(receipt);
+    payload.remove('id');
+    payload.remove('created_at');
+    if (payload['receipt_number'] == null || (payload['receipt_number'] as String).isEmpty) {
+      payload['receipt_number'] = 'RCP-${DateTime.now().millisecondsSinceEpoch}';
+    }
 
-    _receipts.insert(0, newReceipt);
+    final response = await SupabaseService.client!
+        .from('payment_receipts')
+        .insert(payload)
+        .select()
+        .single();
 
-    // Update invoice paid and balance amounts
+    final createdReceipt = PaymentReceiptModel.fromJson(response);
+
+    // Update parent invoice balance and payment status
     if (receipt.invoiceId != null) {
-      final idx = _invoices.indexWhere((i) => i.id == receipt.invoiceId);
-      if (idx >= 0) {
-        final inv = _invoices[idx];
-        final newPaid = inv.amountPaid + receipt.amount;
-        final newBalance = (inv.totalOnRoadPrice - newPaid).clamp(0.0, double.infinity);
-        final newStatus = newBalance <= 0.0 ? 'paid' : 'partial';
-        _invoices[idx] = inv.copyWith(
-          amountPaid: newPaid,
-          balanceAmount: newBalance,
-          paymentStatus: newStatus,
-          updatedAt: DateTime.now(),
-        );
+      try {
+        final inv = await fetchInvoiceById(receipt.invoiceId!);
+        if (inv != null) {
+          final newPaid = inv.amountPaid + receipt.amount;
+          final newBalance = (inv.totalOnRoadPrice - newPaid).clamp(0.0, double.infinity);
+          final newStatus = newBalance <= 0.0 ? 'paid' : 'partial';
+
+          await SupabaseService.client!.from('sales_invoices').update({
+            'amount_paid': newPaid,
+            'balance_amount': newBalance,
+            'payment_status': newStatus,
+            'updated_at': DateTime.now().toIso8601String(),
+          }).eq('id', receipt.invoiceId!);
+        }
+      } catch (e) {
+        debugPrint('Note updating invoice balance: $e');
       }
     }
 
-    return newReceipt;
+    return createdReceipt;
   }
 
   // ═══════════════════════════════════════════════════════════════════
   // DELIVERY CHALLAN & GATE PASS
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch delivery challans
+  /// Fetch delivery challans from Supabase
   Future<List<DeliveryChallanEntity>> fetchDeliveryChallans({String? showroomId}) async {
-    await SupabaseService.devLatency();
-    var result = List<DeliveryChallanEntity>.from(_challans);
-    if (showroomId != null) result = result.where((dc) => dc.showroomId == showroomId).toList();
-    return result;
+    if (!_isSupabaseLive) return [];
+
+    try {
+      var query = SupabaseService.client!.from('delivery_challans').select(
+        '*, sales_invoices(invoice_number, vehicle_variants(name, vehicle_models(name)), vehicle_colors(name))',
+      );
+      if (showroomId != null && showroomId.isNotEmpty) {
+        query = query.eq('showroom_id', showroomId);
+      }
+      final response = await query.order('created_at', ascending: false);
+      final rawList = response as List;
+
+      return rawList.map((e) {
+        final row = Map<String, dynamic>.from(e as Map);
+        final inv = row['sales_invoices'] as Map<String, dynamic>?;
+        if (inv != null) {
+          row['invoice_number'] = inv['invoice_number'];
+          final variant = inv['vehicle_variants'] as Map<String, dynamic>?;
+          if (variant != null) {
+            row['variant_name'] = variant['name'];
+            final model = variant['vehicle_models'] as Map<String, dynamic>?;
+            if (model != null) {
+              row['model_name'] = model['name'];
+            }
+          }
+          final color = inv['vehicle_colors'] as Map<String, dynamic>?;
+          if (color != null) {
+            row['color_name'] = color['name'];
+          }
+        }
+        return DeliveryChallanModel.fromJson(row);
+      }).toList();
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchDeliveryChallans error: $e');
+      return [];
+    }
   }
 
   /// Fetch delivery challan by ID
   Future<DeliveryChallanEntity?> fetchDeliveryChallanById(String id) async {
-    return _challans.cast<DeliveryChallanEntity?>().firstWhere((dc) => dc!.id == id, orElse: () => null);
+    if (!_isSupabaseLive) return null;
+
+    try {
+      final response = await SupabaseService.client!
+          .from('delivery_challans')
+          .select()
+          .eq('id', id)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return DeliveryChallanModel.fromJson(response);
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchDeliveryChallanById error: $e');
+      return null;
+    }
   }
 
   /// Fetch delivery challan by invoice ID
   Future<DeliveryChallanEntity?> fetchChallanByInvoiceId(String invoiceId) async {
-    return _challans.cast<DeliveryChallanEntity?>().firstWhere((dc) => dc!.invoiceId == invoiceId, orElse: () => null);
+    if (!_isSupabaseLive) return null;
+
+    try {
+      final response = await SupabaseService.client!
+          .from('delivery_challans')
+          .select()
+          .eq('invoice_id', invoiceId)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return DeliveryChallanModel.fromJson(response);
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchChallanByInvoiceId error: $e');
+      return null;
+    }
   }
 
   /// Fetch invoice line items
   Future<List<InvoiceItemEntity>> fetchInvoiceItems(String invoiceId) async {
-    return _invoiceItems.where((item) => item.invoiceId == invoiceId).toList();
+    if (!_isSupabaseLive) return [];
+
+    try {
+      final response = await SupabaseService.client!
+          .from('invoice_items')
+          .select()
+          .eq('invoice_id', invoiceId)
+          .order('created_at', ascending: true);
+
+      return (response as List).map((e) => InvoiceItemModel.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchInvoiceItems error: $e');
+      return [];
+    }
   }
 
   /// Create a Delivery Challan, updates Invoice to 'delivered' and vehicle to 'delivered'
   Future<DeliveryChallanEntity> createDeliveryChallan(DeliveryChallanEntity challan) async {
-    final challanNumber = 'DC-DEV-${_challanSeq.toString().padLeft(5, '0')}';
-    _challanSeq++;
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
+    }
 
-    final newChallan = DeliveryChallanEntity(
-      id: 'dc-${DateTime.now().millisecondsSinceEpoch}',
-      showroomId: challan.showroomId,
-      invoiceId: challan.invoiceId,
-      challanNumber: challanNumber,
-      challanDate: DateTime.now(),
-      allocatedVin: challan.allocatedVin,
-      odometerReadingKm: challan.odometerReadingKm,
-      batterySocPercent: challan.batterySocPercent,
-      fuelLevel: challan.fuelLevel,
-      helmetProvided: challan.helmetProvided,
-      toolkitProvided: challan.toolkitProvided,
-      firstAidKitProvided: challan.firstAidKitProvided,
-      ownerManualProvided: challan.ownerManualProvided,
-      spareKeysCount: challan.spareKeysCount,
-      batteryChargerSerial: challan.batteryChargerSerial,
-      pdiFormSigned: challan.pdiFormSigned,
-      customerAcceptanceSigned: challan.customerAcceptanceSigned,
-      deliveredBy: challan.deliveredBy,
-      receivedByName: challan.receivedByName,
-      receivedByRelationship: challan.receivedByRelationship,
-      notes: challan.notes,
-      createdAt: DateTime.now(),
-      invoiceNumber: challan.invoiceNumber,
-      customerName: challan.customerName,
-      modelName: challan.modelName,
-      variantName: challan.variantName,
-      colorName: challan.colorName,
-    );
+    final payload = DeliveryChallanModel.toJson(challan);
+    payload.remove('id');
+    payload.remove('created_at');
+    if (payload['challan_number'] == null || (payload['challan_number'] as String).isEmpty) {
+      payload['challan_number'] = 'DC-${DateTime.now().millisecondsSinceEpoch}';
+    }
 
-    _challans.insert(0, newChallan);
+    final response = await SupabaseService.client!
+        .from('delivery_challans')
+        .insert(payload)
+        .select()
+        .single();
+
+    final createdChallan = DeliveryChallanModel.fromJson(response);
 
     // Update invoice status to 'delivered'
-    final invIdx = _invoices.indexWhere((i) => i.id == challan.invoiceId);
-    if (invIdx >= 0) {
-      _invoices[invIdx] = _invoices[invIdx].copyWith(
-        status: 'delivered',
-        updatedAt: DateTime.now(),
-      );
+    try {
+      await updateInvoiceStatus(challan.invoiceId, 'delivered');
+    } catch (e) {
+      debugPrint('Note updating invoice status on delivery: $e');
     }
 
     // Update vehicle inventory status if vehicle ID or VIN is known
@@ -647,71 +441,74 @@ class SalesManagementService {
         await InventoryManagementService.instance.logStockMovement(
           vehicleId: v.vehicle.id,
           movementType: 'delivered',
-          remarks: 'Vehicle handed over to customer under challan $challanNumber',
+          remarks: 'Vehicle handed over to customer under challan ${createdChallan.challanNumber}',
         );
       }
     } catch (e) {
-      debugPrint('Note: Inventory update on delivery: $e');
+      debugPrint('Note updating inventory vehicle on delivery: $e');
     }
 
-    return newChallan;
+    return createdChallan;
   }
 
   /// Fetch gate passes
-  Future<List<GatePassEntity>> fetchGatePasses({String? showroomId}) async {
-    await SupabaseService.devLatency();
-    var result = List<GatePassEntity>.from(_gatePasses);
-    if (showroomId != null) result = result.where((gp) => gp.showroomId == showroomId).toList();
-    return result;
-  }
+  Future<List<GatePassEntity>> fetchGatePasses({String? showroomId, String? challanId}) async {
+    if (!_isSupabaseLive) return [];
 
-  /// Create a Gate Pass
-  Future<GatePassEntity> createGatePass(GatePassEntity pass) async {
-    final gpNumber = 'GP-DEV-${_gatePassSeq.toString().padLeft(5, '0')}';
-    _gatePassSeq++;
-
-    final newPass = GatePassEntity(
-      id: 'gp-${DateTime.now().millisecondsSinceEpoch}',
-      showroomId: pass.showroomId,
-      challanId: pass.challanId,
-      invoiceId: pass.invoiceId,
-      gatePassNumber: gpNumber,
-      issuedAt: DateTime.now(),
-      vin: pass.vin,
-      customerName: pass.customerName,
-      authorizedBy: pass.authorizedBy,
-      authorizedByName: pass.authorizedByName ?? 'Showroom Manager',
-      securityGuardName: pass.securityGuardName,
-      status: 'issued',
-      createdAt: DateTime.now(),
-    );
-
-    _gatePasses.insert(0, newPass);
-    return newPass;
-  }
-
-  /// Mark gate pass departed (Security guard action)
-  Future<GatePassEntity> markGatePassDeparted(String gatePassId, String guardName) async {
-    final idx = _gatePasses.indexWhere((gp) => gp.id == gatePassId);
-    if (idx >= 0) {
-      _gatePasses[idx] = GatePassEntity(
-        id: _gatePasses[idx].id,
-        showroomId: _gatePasses[idx].showroomId,
-        challanId: _gatePasses[idx].challanId,
-        invoiceId: _gatePasses[idx].invoiceId,
-        gatePassNumber: _gatePasses[idx].gatePassNumber,
-        issuedAt: _gatePasses[idx].issuedAt,
-        vin: _gatePasses[idx].vin,
-        customerName: _gatePasses[idx].customerName,
-        authorizedBy: _gatePasses[idx].authorizedBy,
-        authorizedByName: _gatePasses[idx].authorizedByName,
-        securityGuardName: guardName,
-        vehicleDepartedAt: DateTime.now(),
-        status: 'departed',
-        createdAt: _gatePasses[idx].createdAt,
-      );
-      return _gatePasses[idx];
+    try {
+      var query = SupabaseService.client!.from('gate_passes').select();
+      if (showroomId != null && showroomId.isNotEmpty) {
+        query = query.eq('showroom_id', showroomId);
+      }
+      if (challanId != null && challanId.isNotEmpty) {
+        query = query.eq('challan_id', challanId);
+      }
+      final response = await query.order('created_at', ascending: false);
+      return (response as List).map((e) => GatePassModel.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('SalesManagementService.fetchGatePasses error: $e');
+      return [];
     }
-    throw Exception('Gate pass not found: $gatePassId');
+  }
+
+  /// Create security Gate Pass for physical showroom exit
+  Future<GatePassEntity> createGatePass(GatePassEntity gatePass) async {
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
+    }
+
+    final payload = GatePassModel.toJson(gatePass);
+    payload.remove('id');
+    payload.remove('created_at');
+    if (payload['gate_pass_number'] == null || (payload['gate_pass_number'] as String).isEmpty) {
+      payload['gate_pass_number'] = 'GP-${DateTime.now().millisecondsSinceEpoch}';
+    }
+
+    final response = await SupabaseService.client!
+        .from('gate_passes')
+        .insert(payload)
+        .select()
+        .single();
+
+    return GatePassModel.fromJson(response);
+  }
+
+  /// Security mark vehicle departure at the showroom exit gate
+  Future<GatePassEntity> markGatePassDeparted(String gatePassId) async {
+    if (!_isSupabaseLive) {
+      throw Exception('Supabase connection is not active');
+    }
+
+    final response = await SupabaseService.client!
+        .from('gate_passes')
+        .update({
+          'status': 'departed',
+          'vehicle_departed_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', gatePassId)
+        .select()
+        .single();
+
+    return GatePassModel.fromJson(response);
   }
 }

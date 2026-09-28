@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'accounting_management_service.dart';
+import 'sales_management_service.dart';
+import 'supplier_management_service.dart';
 import 'supabase_service.dart';
+import '../config/supabase_config.dart';
 import '../../features/finance/domain/entities/finance_voucher_entity.dart';
 import '../../features/finance/domain/entities/party_outstanding_entity.dart';
 import '../../features/accounting/domain/entities/journal_entry_entity.dart';
@@ -9,374 +13,17 @@ import '../../features/accounting/domain/entities/journal_line_entity.dart';
 ///
 /// Handles Cash & Bank accounts, Payments, Receipts, Contra transfers,
 /// Credit/Debit Notes, Outstandings aging analysis, and real-time
-/// synchronization with the Double-Entry General Ledger.
+/// synchronization with the Double-Entry General Ledger directly backed by Supabase.
 class FinanceManagementService {
   FinanceManagementService._();
   static final FinanceManagementService instance = FinanceManagementService._();
 
   final AccountingManagementService _accountingService = AccountingManagementService.instance;
 
-  // ═══════════════════════════════════════════════════════════════════
-  // DEV SEED DATA — REALISTIC INDIAN TWO-WHEELER DEALERSHIP
-  // ═══════════════════════════════════════════════════════════════════
+  bool get _isSupabaseLive =>
+      SupabaseConfig.isConfigured && SupabaseService.client != null;
 
-  static final DateTime _now = DateTime.now();
-  static final DateTime _twoDaysAgo = _now.subtract(const Duration(days: 2));
-  static final DateTime _tenDaysAgo = _now.subtract(const Duration(days: 10));
-  static final DateTime _twentyDaysAgo = _now.subtract(const Duration(days: 20));
-
-  static const String _mumbaiId = 'showroom-mumbai-main';
-  static const String _puneId = 'showroom-pune-west';
-
-  static final List<FinanceVoucherEntity> _devVouchers = [
-    // 1. Payment Voucher: OEM Stock Purchase (Honda)
-    FinanceVoucherEntity(
-      id: 'vch-001',
-      showroomId: _mumbaiId,
-      voucherNumber: 'PMT-MUM-2026-00001',
-      voucherType: 'payment',
-      voucherDate: _twentyDaysAgo,
-      partyType: 'oem',
-      partyId: 'oem-honda',
-      partyName: 'Honda Motorcycle & Scooter India Pvt Ltd',
-      partyPhone: '+91 22 6677 8800',
-      paymentMode: 'bank_transfer',
-      sourceAccountId: 'acc-1020', // HDFC Bank
-      destinationAccountId: 'acc-2010', // Sundry Creditors
-      amount: 1500000.0,
-      taxDeductedTds: 0.0,
-      netAmount: 1500000.0,
-      referenceNumber: 'RTGS-HDFC-994821034',
-      referenceDate: _twentyDaysAgo,
-      bankName: 'HDFC Bank',
-      narration: 'Batch payment for 10 units Honda Shine 125 stock shipment',
-      status: 'posted',
-      journalEntryId: 'jrn-pmt-001',
-      createdAt: _twentyDaysAgo,
-      updatedAt: _twentyDaysAgo,
-      showroomName: 'Mumbai Flagship',
-      sourceAccountName: 'HDFC Bank Current A/c (Operations)',
-      destinationAccountName: 'Sundry Creditors — OEMs (Honda / Ather / TVS)',
-    ),
-
-    // 2. Receipt Voucher: Customer Advance (Cashier Drawer)
-    FinanceVoucherEntity(
-      id: 'vch-002',
-      showroomId: _mumbaiId,
-      voucherNumber: 'RCT-MUM-2026-00001',
-      voucherType: 'receipt',
-      voucherDate: _tenDaysAgo,
-      partyType: 'customer',
-      partyId: 'cust-101',
-      partyName: 'Ankit Verma',
-      partyPhone: '+91 98201 23456',
-      paymentMode: 'cash',
-      sourceAccountId: 'acc-2030', // Customer Advance Booking Deposits
-      destinationAccountId: 'acc-1010', // Cash on Hand
-      amount: 15000.0,
-      taxDeductedTds: 0.0,
-      netAmount: 15000.0,
-      referenceNumber: 'CASH-REC-001',
-      referenceDate: _tenDaysAgo,
-      narration: 'Booking token advance receipt for TVS Apache RTR 160 4V',
-      status: 'posted',
-      journalEntryId: 'jrn-rct-001',
-      createdAt: _tenDaysAgo,
-      updatedAt: _tenDaysAgo,
-      showroomName: 'Mumbai Flagship',
-      sourceAccountName: 'Customer Advance Booking Deposits',
-      destinationAccountName: 'Cash on Hand (Showroom Drawers)',
-    ),
-
-    // 3. Contra Transfer: Cash Deposit to Bank
-    FinanceVoucherEntity(
-      id: 'vch-003',
-      showroomId: _mumbaiId,
-      voucherNumber: 'CNT-MUM-2026-00001',
-      voucherType: 'contra',
-      voucherDate: _twoDaysAgo,
-      partyType: 'bank',
-      partyId: 'bank-hdfc',
-      partyName: 'HDFC Bank Operations Deposit',
-      paymentMode: 'cash',
-      sourceAccountId: 'acc-1010', // Cash on Hand
-      destinationAccountId: 'acc-1020', // HDFC Bank
-      amount: 50000.0,
-      taxDeductedTds: 0.0,
-      netAmount: 50000.0,
-      referenceNumber: 'CHQ-DEP-773412',
-      referenceDate: _twoDaysAgo,
-      bankName: 'HDFC Bank - Fort Branch',
-      narration: 'Cashier daily showroom excess cash deposit to HDFC Current Account',
-      status: 'posted',
-      journalEntryId: 'jrn-cnt-001',
-      createdAt: _twoDaysAgo,
-      updatedAt: _twoDaysAgo,
-      showroomName: 'Mumbai Flagship',
-      sourceAccountName: 'Cash on Hand (Showroom Drawers)',
-      destinationAccountName: 'HDFC Bank Current A/c (Operations)',
-    ),
-
-    // 4. Petty Cash Expense Voucher: Showroom Utility & Refreshments
-    FinanceVoucherEntity(
-      id: 'vch-004',
-      showroomId: _mumbaiId,
-      voucherNumber: 'EXP-MUM-2026-00001',
-      voucherType: 'expense',
-      voucherDate: _twoDaysAgo,
-      partyType: 'other',
-      partyName: 'City Power Corporation & Refreshments',
-      paymentMode: 'cash',
-      sourceAccountId: 'acc-1010', // Cash on Hand
-      destinationAccountId: 'acc-6030', // Electricity & Utilities
-      amount: 4500.0,
-      taxDeductedTds: 0.0,
-      netAmount: 4500.0,
-      referenceNumber: 'BILL-UTIL-4421',
-      referenceDate: _twoDaysAgo,
-      narration: 'Emergency water dispenser recharge and client tea/coffee supplies',
-      status: 'posted',
-      journalEntryId: 'jrn-exp-001',
-      createdAt: _twoDaysAgo,
-      updatedAt: _twoDaysAgo,
-      showroomName: 'Mumbai Flagship',
-      sourceAccountName: 'Cash on Hand (Showroom Drawers)',
-      destinationAccountName: 'Showroom Electricity & Utilities',
-    ),
-
-    // 5. Credit Note: Customer Accessory Price Adjustment
-    FinanceVoucherEntity(
-      id: 'vch-005',
-      showroomId: _puneId,
-      voucherNumber: 'CRN-PUN-2026-00001',
-      voucherType: 'credit_note',
-      voucherDate: _twoDaysAgo,
-      partyType: 'customer',
-      partyId: 'cust-102',
-      partyName: 'Priya Sharma',
-      partyPhone: '+91 98330 45678',
-      paymentMode: 'clearing',
-      sourceAccountId: 'acc-1030', // Sundry Debtors
-      destinationAccountId: 'acc-4020', // Sales Revenue Accessories
-      amount: 2500.0,
-      taxDeductedTds: 0.0,
-      netAmount: 2500.0,
-      referenceNumber: 'INV-2026-00042',
-      referenceDate: _twoDaysAgo,
-      narration: 'Credit note issued for complimentary seat cover discount after delivery',
-      status: 'posted',
-      journalEntryId: 'jrn-crn-001',
-      createdAt: _twoDaysAgo,
-      updatedAt: _twoDaysAgo,
-      showroomName: 'Pune West Hub',
-      sourceAccountName: 'Sundry Debtors (Customer Receivables)',
-      destinationAccountName: 'Sales Revenue — Accessories Pack & Helmets',
-    ),
-
-    // 6. Debit Note: Transit Damage Claim on OEM
-    FinanceVoucherEntity(
-      id: 'vch-006',
-      showroomId: _mumbaiId,
-      voucherNumber: 'DBN-MUM-2026-00001',
-      voucherType: 'debit_note',
-      voucherDate: _twoDaysAgo,
-      partyType: 'oem',
-      partyId: 'oem-tvs',
-      partyName: 'TVS Motor Company Ltd',
-      paymentMode: 'clearing',
-      sourceAccountId: 'acc-2010', // Sundry Creditors
-      destinationAccountId: 'acc-1040', // Vehicle Inventory
-      amount: 8000.0,
-      taxDeductedTds: 0.0,
-      netAmount: 8000.0,
-      referenceNumber: 'CHALLAN-INW-8891',
-      referenceDate: _twoDaysAgo,
-      narration: 'Debit note debiting OEM ledger for rear panel transit paint scratch',
-      status: 'posted',
-      journalEntryId: 'jrn-dbn-001',
-      createdAt: _twoDaysAgo,
-      updatedAt: _twoDaysAgo,
-      showroomName: 'Mumbai Flagship',
-      sourceAccountName: 'Sundry Creditors — OEMs (Honda / Ather / TVS)',
-      destinationAccountName: 'Vehicle Inventory — Petrol Motorcycles',
-    ),
-  ];
-
-  static final List<PartyOutstandingEntity> _devCustomerReceivables = [
-    PartyOutstandingEntity(
-      partyId: 'cust-101',
-      partyName: 'Ankit Verma',
-      partyType: 'customer',
-      phone: '+91 98201 23456',
-      email: 'ankit.verma@example.com',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 215799.98,
-      totalSettled: 150000.0,
-      outstandingBalance: 65799.98,
-      bucket0To30: 65799.98,
-      bucket31To60: 0.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _tenDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'cust-102',
-      partyName: 'Priya Sharma',
-      partyType: 'customer',
-      phone: '+91 98330 45678',
-      email: 'priya.sharma@example.com',
-      showroomId: _puneId,
-      showroomName: 'Pune West Hub',
-      totalInvoiced: 154999.0,
-      totalSettled: 120000.0,
-      outstandingBalance: 34999.0,
-      bucket0To30: 34999.0,
-      bucket31To60: 0.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _twoDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'cust-103',
-      partyName: 'Vikram Malhotra',
-      partyType: 'customer',
-      phone: '+91 98111 22334',
-      email: 'vikram.m@example.com',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 185000.0,
-      totalSettled: 100000.0,
-      outstandingBalance: 85000.0,
-      bucket0To30: 0.0,
-      bucket31To60: 85000.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _twentyDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'cust-104',
-      partyName: 'Rajesh Patel',
-      partyType: 'customer',
-      phone: '+91 97222 33445',
-      email: 'rajesh.patel@example.com',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 142000.0,
-      totalSettled: 50000.0,
-      outstandingBalance: 92000.0,
-      bucket0To30: 0.0,
-      bucket31To60: 0.0,
-      bucket61To90: 92000.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _now.subtract(const Duration(days: 75)),
-    ),
-    PartyOutstandingEntity(
-      partyId: 'cust-105',
-      partyName: 'Sunita Rao',
-      partyType: 'customer',
-      phone: '+91 99887 76655',
-      email: 'sunita.rao@example.com',
-      showroomId: _puneId,
-      showroomName: 'Pune West Hub',
-      totalInvoiced: 110000.0,
-      totalSettled: 67799.0,
-      outstandingBalance: 42201.0,
-      bucket0To30: 0.0,
-      bucket31To60: 0.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 42201.0,
-      latestInvoiceDate: _now.subtract(const Duration(days: 120)),
-    ),
-  ];
-
-  static final List<PartyOutstandingEntity> _devSupplierPayables = [
-    PartyOutstandingEntity(
-      partyId: 'oem-honda',
-      partyName: 'Honda Motorcycle & Scooter India Pvt Ltd',
-      partyType: 'supplier',
-      phone: '+91 22 6677 8800',
-      email: 'orders@honda2wheelersindia.com',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 4500000.0,
-      totalSettled: 3000000.0,
-      outstandingBalance: 1500000.0,
-      bucket0To30: 1500000.0,
-      bucket31To60: 0.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _tenDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'oem-ather',
-      partyName: 'Ather Energy Pvt Ltd',
-      partyType: 'supplier',
-      phone: '+91 80 6633 4455',
-      email: 'dealer.ops@atherenergy.com',
-      showroomId: _puneId,
-      showroomName: 'Pune West Hub',
-      totalInvoiced: 2800000.0,
-      totalSettled: 1850000.0,
-      outstandingBalance: 950000.0,
-      bucket0To30: 950000.0,
-      bucket31To60: 0.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _twoDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'oem-tvs',
-      partyName: 'TVS Motor Company Ltd',
-      partyType: 'supplier',
-      phone: '+91 44 2833 2111',
-      email: 'dealersupport@tvsmotor.com',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 1600000.0,
-      totalSettled: 1100000.0,
-      outstandingBalance: 500000.0,
-      bucket0To30: 0.0,
-      bucket31To60: 500000.0,
-      bucket61To90: 0.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _twentyDaysAgo,
-    ),
-    PartyOutstandingEntity(
-      partyId: 'supp-parts',
-      partyName: 'Apex Two-Wheeler Accessories Hub',
-      partyType: 'supplier',
-      phone: '+91 22 2455 6677',
-      email: 'sales@apexhelmets.in',
-      showroomId: _mumbaiId,
-      showroomName: 'Mumbai Flagship',
-      totalInvoiced: 320000.0,
-      totalSettled: 170000.0,
-      outstandingBalance: 150000.0,
-      bucket0To30: 0.0,
-      bucket31To60: 0.0,
-      bucket61To90: 150000.0,
-      bucket90Plus: 0.0,
-      latestInvoiceDate: _now.subtract(const Duration(days: 70)),
-    ),
-  ];
-
-  // ═══════════════════════════════════════════════════════════════════
-  // STATE STORE (IN-MEMORY DEV MODE)
-  // ═══════════════════════════════════════════════════════════════════
-
-  late List<FinanceVoucherEntity> _vouchers = List.from(_devVouchers);
-  late List<PartyOutstandingEntity> _customers = List.from(_devCustomerReceivables);
-  late List<PartyOutstandingEntity> _suppliers = List.from(_devSupplierPayables);
-  int _voucherSeq = 7;
-
-  /// Reset in-memory dev state (used for test isolation)
-  void resetDevData() {
-    _vouchers = List.from(_devVouchers);
-    _customers = List.from(_devCustomerReceivables);
-    _suppliers = List.from(_devSupplierPayables);
-    _voucherSeq = 7;
-  }
+  void resetDevData() {}
 
   // ═══════════════════════════════════════════════════════════════════
   // CASH & BANK BALANCES (QUERIED DIRECTLY FROM GENERAL LEDGER)
@@ -406,36 +53,88 @@ class FinanceManagementService {
   // VOUCHER MANAGEMENT & AUTOMATIC DOUBLE-ENTRY POSTING
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch vouchers with optional filtering
+  /// Fetch vouchers with optional filtering from Supabase
   Future<List<FinanceVoucherEntity>> fetchVouchers({
     String? showroomId,
     String? voucherType,
     String? status,
     String? search,
   }) async {
-    await SupabaseService.devLatency();
-    var result = List<FinanceVoucherEntity>.from(_vouchers);
+    if (!_isSupabaseLive) return [];
 
-    if (showroomId != null && showroomId.isNotEmpty) {
-      result = result.where((v) => v.showroomId == showroomId).toList();
-    }
-    if (voucherType != null && voucherType.isNotEmpty && voucherType != 'all') {
-      result = result.where((v) => v.voucherType == voucherType).toList();
-    }
-    if (status != null && status.isNotEmpty && status != 'all') {
-      result = result.where((v) => v.status == status).toList();
-    }
-    if (search != null && search.isNotEmpty) {
-      final s = search.toLowerCase();
-      result = result.where((v) =>
-          v.voucherNumber.toLowerCase().contains(s) ||
-          v.partyName.toLowerCase().contains(s) ||
-          (v.referenceNumber?.toLowerCase().contains(s) ?? false)).toList();
-    }
+    try {
+      var query = SupabaseService.client!.from('finance_vouchers').select(
+        '*, showrooms(name), src:source_account_id(account_name), dest:destination_account_id(account_name)',
+      );
 
-    // Sort descending by date
-    result.sort((a, b) => b.voucherDate.compareTo(a.voucherDate));
-    return result;
+      if (showroomId != null && showroomId.isNotEmpty) {
+        query = query.eq('showroom_id', showroomId);
+      }
+      if (voucherType != null && voucherType.isNotEmpty && voucherType != 'all') {
+        query = query.eq('voucher_type', voucherType);
+      }
+      if (status != null && status.isNotEmpty && status != 'all') {
+        query = query.eq('status', status);
+      }
+
+      final response = await query.order('voucher_date', ascending: false);
+      final rawList = response as List;
+
+      final results = rawList.map((e) {
+        final row = Map<String, dynamic>.from(e as Map);
+        final sh = row['showrooms'] as Map<String, dynamic>?;
+        if (sh != null) row['showroom_name'] = sh['name'];
+
+        final src = row['src'] as Map<String, dynamic>?;
+        if (src != null) row['source_account_name'] = src['account_name'];
+
+        final dest = row['dest'] as Map<String, dynamic>?;
+        if (dest != null) row['destination_account_name'] = dest['account_name'];
+
+        return FinanceVoucherEntity(
+          id: row['id'] as String,
+          showroomId: row['showroom_id'] as String? ?? '',
+          voucherNumber: row['voucher_number'] as String? ?? '',
+          voucherType: row['voucher_type'] as String? ?? 'payment',
+          voucherDate: DateTime.tryParse(row['voucher_date']?.toString() ?? '') ?? DateTime.now(),
+          partyType: row['party_type'] as String? ?? 'other',
+          partyId: row['party_id'] as String?,
+          partyName: row['party_name'] as String? ?? '',
+          partyPhone: row['party_phone'] as String?,
+          paymentMode: row['payment_mode'] as String? ?? 'bank_transfer',
+          sourceAccountId: row['source_account_id'] as String?,
+          destinationAccountId: row['destination_account_id'] as String?,
+          amount: (row['amount'] as num?)?.toDouble() ?? 0.0,
+          taxDeductedTds: (row['tax_deducted_tds'] as num?)?.toDouble() ?? 0.0,
+          netAmount: (row['net_amount'] as num?)?.toDouble() ?? 0.0,
+          referenceNumber: row['reference_number'] as String?,
+          referenceDate: row['reference_date'] != null ? DateTime.tryParse(row['reference_date'].toString()) : null,
+          bankName: row['bank_name'] as String?,
+          narration: row['narration'] as String? ?? '',
+          status: row['status'] as String? ?? 'posted',
+          journalEntryId: row['journal_entry_id'] as String?,
+          createdAt: DateTime.tryParse(row['created_at']?.toString() ?? '') ?? DateTime.now(),
+          // DB column is camelCase 'updatedAt', not snake_case 'updated_at'
+          updatedAt: DateTime.tryParse((row['updatedAt'] ?? row['updated_at'])?.toString() ?? '') ?? DateTime.now(),
+          showroomName: row['showroom_name'] as String?,
+          sourceAccountName: row['source_account_name'] as String?,
+          destinationAccountName: row['destination_account_name'] as String?,
+        );
+      }).toList();
+
+      if (search != null && search.trim().isNotEmpty) {
+        final s = search.trim().toLowerCase();
+        return results.where((v) =>
+            v.voucherNumber.toLowerCase().contains(s) ||
+            v.partyName.toLowerCase().contains(s) ||
+            (v.referenceNumber?.toLowerCase().contains(s) ?? false)).toList();
+      }
+
+      return results;
+    } catch (e) {
+      debugPrint('FinanceManagementService.fetchVouchers error: $e');
+      return [];
+    }
   }
 
   /// Create and post a Financial Voucher with automatic General Ledger integration
@@ -443,6 +142,7 @@ class FinanceManagementService {
     FinanceVoucherEntity voucher, {
     bool autoPostToGL = true,
   }) async {
+    if (!_isSupabaseLive) throw Exception('Supabase connection is not active');
     if (voucher.amount <= 0) {
       throw ArgumentError('Voucher amount must be strictly positive.');
     }
@@ -450,39 +150,62 @@ class FinanceManagementService {
     final prefix = _getVoucherPrefix(voucher.voucherType);
     final voucherNumber = voucher.voucherNumber.isNotEmpty
         ? voucher.voucherNumber
-        : '$prefix-DEV-${_voucherSeq.toString().padLeft(5, '0')}';
-    _voucherSeq++;
-
-    final voucherId = 'vch-${DateTime.now().millisecondsSinceEpoch}';
+        : '$prefix-${DateTime.now().millisecondsSinceEpoch}';
 
     String? createdJournalId;
 
-    // ─── AUTOMATIC GENERAL LEDGER DOUBLE-ENTRY INTEGRATION ───
+    // Automatic GL entry
     if (autoPostToGL && voucher.sourceAccountId != null && voucher.destinationAccountId != null) {
-      final glEntry = await _postCorrespondingJournalEntry(
-        voucherId: voucherId,
-        voucherNumber: voucherNumber,
-        voucher: voucher,
-      );
-      createdJournalId = glEntry.id;
+      try {
+        final glEntry = await _postCorrespondingJournalEntry(
+          voucherNumber: voucherNumber,
+          voucher: voucher,
+        );
+        createdJournalId = glEntry.id;
+      } catch (e) {
+        debugPrint('Note creating GL entry for voucher: $e');
+      }
     }
 
-    final newVoucher = voucher.copyWith(
-      id: voucherId,
+    final payload = {
+      'showroom_id': voucher.showroomId,
+      'voucher_number': voucherNumber,
+      'voucher_type': voucher.voucherType,
+      'voucher_date': voucher.voucherDate.toIso8601String().substring(0, 10),
+      'party_type': voucher.partyType,
+      'party_id': voucher.partyId,
+      'party_name': voucher.partyName,
+      'party_phone': voucher.partyPhone,
+      'payment_mode': voucher.paymentMode,
+      'source_account_id': voucher.sourceAccountId,
+      'destination_account_id': voucher.destinationAccountId,
+      'amount': voucher.amount,
+      'tax_deducted_tds': voucher.taxDeductedTds,
+      'net_amount': voucher.netAmount,
+      'reference_number': voucher.referenceNumber,
+      'reference_date': voucher.referenceDate?.toIso8601String().substring(0, 10),
+      'bank_name': voucher.bankName,
+      'narration': voucher.narration,
+      'status': voucher.status,
+      'journal_entry_id': createdJournalId,
+    };
+
+    final res = await SupabaseService.client!
+        .from('finance_vouchers')
+        .insert(payload)
+        .select()
+        .single();
+
+    return voucher.copyWith(
+      id: res['id'] as String,
       voucherNumber: voucherNumber,
-      status: 'posted',
       journalEntryId: createdJournalId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-
-    _vouchers.insert(0, newVoucher);
-    return newVoucher;
   }
 
-  /// Internal handler: Maps financial voucher into a balanced Double-Entry Journal Voucher
   Future<JournalEntryEntity> _postCorrespondingJournalEntry({
-    required String voucherId,
     required String voucherNumber,
     required FinanceVoucherEntity voucher,
   }) async {
@@ -492,23 +215,6 @@ class FinanceManagementService {
     if (srcAcct == null || destAcct == null) {
       throw ArgumentError('Specified source or destination account does not exist in Chart of Accounts.');
     }
-
-    // Determine Debit and Credit assignment based on voucher nature
-    // - PAYMENT / EXPENSE:
-    //   Debit: Destination (Vendor / Expense / Liability)
-    //   Credit: Source (Cash / Bank)
-    // - RECEIPT:
-    //   Debit: Destination (Cash / Bank)
-    //   Credit: Source (Customer / Debtors / Advance)
-    // - CONTRA:
-    //   Debit: Destination (Receiving Cash or Bank)
-    //   Credit: Source (Sending Cash or Bank)
-    // - CREDIT NOTE:
-    //   Debit: Destination (Sales Return / Discount)
-    //   Credit: Source (Customer Debtors)
-    // - DEBIT NOTE:
-    //   Debit: Source (Vendor Payable)
-    //   Credit: Destination (Purchase Return / Cost Adjustment)
 
     String debitAccountId;
     String debitAccountName;
@@ -520,52 +226,40 @@ class FinanceManagementService {
     String creditAccountCode;
     String creditAccountType;
 
-    if (voucher.isPayment || voucher.isExpense) {
-      debitAccountId = destAcct.id;
-      debitAccountName = destAcct.accountName;
-      debitAccountCode = destAcct.accountCode;
-      debitAccountType = destAcct.accountType;
+    switch (voucher.voucherType) {
+      case 'receipt':
+        debitAccountId = destAcct.id;
+        debitAccountName = destAcct.accountName;
+        debitAccountCode = destAcct.accountCode;
+        debitAccountType = destAcct.accountType;
 
-      creditAccountId = srcAcct.id;
-      creditAccountName = srcAcct.accountName;
-      creditAccountCode = srcAcct.accountCode;
-      creditAccountType = srcAcct.accountType;
-    } else if (voucher.isReceipt || voucher.isContra) {
-      debitAccountId = destAcct.id;
-      debitAccountName = destAcct.accountName;
-      debitAccountCode = destAcct.accountCode;
-      debitAccountType = destAcct.accountType;
+        creditAccountId = srcAcct.id;
+        creditAccountName = srcAcct.accountName;
+        creditAccountCode = srcAcct.accountCode;
+        creditAccountType = srcAcct.accountType;
+        break;
 
-      creditAccountId = srcAcct.id;
-      creditAccountName = srcAcct.accountName;
-      creditAccountCode = srcAcct.accountCode;
-      creditAccountType = srcAcct.accountType;
-    } else if (voucher.isCreditNote) {
-      debitAccountId = destAcct.id;
-      debitAccountName = destAcct.accountName;
-      debitAccountCode = destAcct.accountCode;
-      debitAccountType = destAcct.accountType;
+      case 'payment':
+      case 'expense':
+      case 'contra':
+      case 'credit_note':
+      case 'debit_note':
+      default:
+        debitAccountId = destAcct.id;
+        debitAccountName = destAcct.accountName;
+        debitAccountCode = destAcct.accountCode;
+        debitAccountType = destAcct.accountType;
 
-      creditAccountId = srcAcct.id;
-      creditAccountName = srcAcct.accountName;
-      creditAccountCode = srcAcct.accountCode;
-      creditAccountType = srcAcct.accountType;
-    } else {
-      // Debit Note
-      debitAccountId = srcAcct.id;
-      debitAccountName = srcAcct.accountName;
-      debitAccountCode = srcAcct.accountCode;
-      debitAccountType = srcAcct.accountType;
-
-      creditAccountId = destAcct.id;
-      creditAccountName = destAcct.accountName;
-      creditAccountCode = destAcct.accountCode;
-      creditAccountType = destAcct.accountType;
+        creditAccountId = srcAcct.id;
+        creditAccountName = srcAcct.accountName;
+        creditAccountCode = srcAcct.accountCode;
+        creditAccountType = srcAcct.accountType;
+        break;
     }
 
     final lines = [
       JournalLineEntity(
-        id: 'line-dr-${DateTime.now().microsecondsSinceEpoch}',
+        id: '',
         journalEntryId: '',
         accountId: debitAccountId,
         accountCode: debitAccountCode,
@@ -573,11 +267,11 @@ class FinanceManagementService {
         accountType: debitAccountType,
         debitAmount: voucher.netAmount,
         creditAmount: 0.0,
-        description: '${voucher.typeLabel}: ${voucher.partyName}',
+        description: '${voucher.typeLabel} via ${voucher.paymentModeLabel}',
         createdAt: DateTime.now(),
       ),
       JournalLineEntity(
-        id: 'line-cr-${DateTime.now().microsecondsSinceEpoch}',
+        id: '',
         journalEntryId: '',
         accountId: creditAccountId,
         accountCode: creditAccountCode,
@@ -640,24 +334,88 @@ class FinanceManagementService {
   // OUTSTANDINGS & AGING ANALYSIS (RECEIVABLES & PAYABLES)
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch Customer Receivables (Sundry Debtors) with Aging breakdown
+  /// Fetch Customer Receivables calculated from real invoices
   Future<List<PartyOutstandingEntity>> fetchCustomerReceivables({String? showroomId}) async {
-    await SupabaseService.devLatency();
-    var list = List<PartyOutstandingEntity>.from(_customers);
-    if (showroomId != null && showroomId.isNotEmpty) {
-      list = list.where((p) => p.showroomId == null || p.showroomId == showroomId).toList();
+    final invoices = await SalesManagementService.instance.fetchInvoices(showroomId: showroomId);
+    final unpaid = invoices.where((i) => i.paymentStatus != 'paid' && i.balanceAmount > 0).toList();
+
+    final Map<String, List<dynamic>> grouped = {};
+    for (final inv in unpaid) {
+      grouped.putIfAbsent(inv.customerId, () => []).add(inv);
     }
+
+    final now = DateTime.now();
+    final list = <PartyOutstandingEntity>[];
+
+    for (final entry in grouped.entries) {
+      final custInvoices = entry.value;
+      final first = custInvoices.first;
+      final totalInvoiced = custInvoices.fold<double>(0.0, (s, i) => s + (i.totalOnRoadPrice as double));
+      final totalSettled = custInvoices.fold<double>(0.0, (s, i) => s + (i.amountPaid as double));
+      final balance = totalInvoiced - totalSettled;
+
+      double b0 = 0, b30 = 0, b60 = 0, b90 = 0;
+      for (final inv in custInvoices) {
+        final days = now.difference(inv.invoiceDate as DateTime).inDays;
+        final b = inv.balanceAmount as double;
+        if (days <= 30) {
+          b0 += b;
+        } else if (days <= 60) {
+          b30 += b;
+        } else if (days <= 90) {
+          b60 += b;
+        } else {
+          b90 += b;
+        }
+      }
+
+      list.add(PartyOutstandingEntity(
+        partyId: entry.key,
+        partyName: first.customerName ?? 'Customer #${entry.key}',
+        partyType: 'customer',
+        phone: first.customerMobile ?? '',
+        showroomId: first.showroomId,
+        showroomName: first.showroomName,
+        totalInvoiced: totalInvoiced,
+        totalSettled: totalSettled,
+        outstandingBalance: balance,
+        bucket0To30: b0,
+        bucket31To60: b30,
+        bucket61To90: b60,
+        bucket90Plus: b90,
+        latestInvoiceDate: first.invoiceDate as DateTime,
+      ));
+    }
+
     list.sort((a, b) => b.outstandingBalance.compareTo(a.outstandingBalance));
     return list;
   }
 
-  /// Fetch Supplier/OEM Payables (Sundry Creditors) with Aging breakdown
+  /// Fetch Supplier/OEM Payables from live suppliers
   Future<List<PartyOutstandingEntity>> fetchSupplierPayables({String? showroomId}) async {
-    await SupabaseService.devLatency();
-    var list = List<PartyOutstandingEntity>.from(_suppliers);
-    if (showroomId != null && showroomId.isNotEmpty) {
-      list = list.where((p) => p.showroomId == null || p.showroomId == showroomId).toList();
+    final suppliers = await SupplierManagementService.instance.fetchSuppliers();
+    final list = <PartyOutstandingEntity>[];
+
+    for (final s in suppliers) {
+      if (s.openingBalance > 0) {
+        list.add(PartyOutstandingEntity(
+          partyId: s.id,
+          partyName: s.name,
+          partyType: 'supplier',
+          phone: s.phone,
+          email: s.email,
+          totalInvoiced: s.openingBalance,
+          totalSettled: 0.0,
+          outstandingBalance: s.openingBalance,
+          bucket0To30: s.openingBalance,
+          bucket31To60: 0.0,
+          bucket61To90: 0.0,
+          bucket90Plus: 0.0,
+          latestInvoiceDate: s.createdAt,
+        ));
+      }
     }
+
     list.sort((a, b) => b.outstandingBalance.compareTo(a.outstandingBalance));
     return list;
   }

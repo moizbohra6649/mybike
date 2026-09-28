@@ -21,6 +21,11 @@ class DashboardCubit extends Cubit<DashboardState> {
     ));
 
     try {
+      var currentShowrooms = state.showrooms;
+      if (currentShowrooms.isEmpty) {
+        currentShowrooms = await _analyticsService.showroomService.fetchShowrooms();
+      }
+
       final sales = await _analyticsService.getSalesDashboard(showroomId: sId, period: p);
       final purchase = await _analyticsService.getPurchaseDashboard(showroomId: sId, period: p);
       final inventory = await _analyticsService.getInventoryDashboard(showroomId: sId, period: p);
@@ -29,6 +34,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
       emit(state.copyWith(
         status: DashboardStatus.success,
+        showrooms: currentShowrooms,
         salesData: sales,
         purchaseData: purchase,
         inventoryData: inventory,

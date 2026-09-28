@@ -114,20 +114,29 @@ class _ReportViewerContent extends StatelessWidget {
 
             // Showroom Branch Filter Dropdown
             SizedBox(
-              width: 200,
-              child: DropdownButtonFormField<String?>(
-                initialValue: state.criteria.showroomId,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  labelText: 'Showroom Branch',
-                ),
+              width: 220,
+              child: AppDropdown<String?>(
+                isDense: true,
+                hint: 'Showroom Branch',
+                value: state.criteria.showroomId,
                 items: const [
-                  DropdownMenuItem(value: null, child: Text('All Showrooms')),
-                  DropdownMenuItem(value: 'showroom-mumbai-main', child: Text('Mumbai Flagship')),
-                  DropdownMenuItem(value: 'showroom-pune-west', child: Text('Pune West Hub')),
-                  DropdownMenuItem(value: 'showroom-bangalore-metro', child: Text('Bangalore Metro')),
+                  null,
+                  'showroom-mumbai-main',
+                  'showroom-pune-west',
+                  'showroom-bangalore-metro',
                 ],
+                itemLabel: (id) {
+                  switch (id) {
+                    case 'showroom-mumbai-main':
+                      return 'Mumbai Flagship';
+                    case 'showroom-pune-west':
+                      return 'Pune West Hub';
+                    case 'showroom-bangalore-metro':
+                      return 'Bangalore Metro';
+                    default:
+                      return 'All Showrooms';
+                  }
+                },
                 onChanged: (newShowroomId) {
                   final showroomName = newShowroomId == 'showroom-mumbai-main'
                       ? 'Mumbai Flagship'

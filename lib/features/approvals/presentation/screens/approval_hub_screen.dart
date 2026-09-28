@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../common/layouts/app_scaffold.dart';
 import '../../../../common/loaders/app_skeleton.dart';
 import '../../../../common/widgets/responsive_field_row.dart';
+import '../../../../common/widgets/app_dropdown.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -180,32 +181,50 @@ class _ApprovalHubViewState extends State<_ApprovalHubView> with SingleTickerPro
                   ResponsiveFieldRow(
                     spacing: AppDimensions.spacingSm,
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedType,
-                        isExpanded: true,
-                        decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
+                      AppDropdown<String>(
+                        label: 'Type',
+                        value: selectedType,
                         items: const [
-                          DropdownMenuItem(value: 'expense', child: Text('Expense')),
-                          DropdownMenuItem(value: 'discount', child: Text('Discount')),
-                          DropdownMenuItem(value: 'purchase', child: Text('Purchase')),
-                          DropdownMenuItem(value: 'payment', child: Text('Payment')),
-                          DropdownMenuItem(value: 'stock_adjustment', child: Text('Stock Adjustment')),
-                          DropdownMenuItem(value: 'stock_transfer', child: Text('Stock Transfer')),
+                          'expense',
+                          'discount',
+                          'purchase',
+                          'payment',
+                          'stock_adjustment',
+                          'stock_transfer',
                         ],
+                        itemLabel: (val) {
+                          switch (val) {
+                            case 'expense': return 'Expense';
+                            case 'discount': return 'Discount';
+                            case 'purchase': return 'Purchase';
+                            case 'payment': return 'Payment';
+                            case 'stock_adjustment': return 'Stock Adjustment';
+                            case 'stock_transfer': return 'Stock Transfer';
+                            default: return val;
+                          }
+                        },
                         onChanged: (val) {
                           if (val != null) setDialogState(() => selectedType = val);
                         },
                       ),
-                      DropdownButtonFormField<String>(
-                        initialValue: selectedUrgency,
-                        isExpanded: true,
-                        decoration: const InputDecoration(labelText: 'Urgency', border: OutlineInputBorder()),
+                      AppDropdown<String>(
+                        label: 'Urgency',
+                        value: selectedUrgency,
                         items: const [
-                          DropdownMenuItem(value: 'low', child: Text('Low')),
-                          DropdownMenuItem(value: 'normal', child: Text('Normal')),
-                          DropdownMenuItem(value: 'high', child: Text('High')),
-                          DropdownMenuItem(value: 'critical', child: Text('Critical')),
+                          'low',
+                          'normal',
+                          'high',
+                          'critical',
                         ],
+                        itemLabel: (val) {
+                          switch (val) {
+                            case 'low': return 'Low';
+                            case 'normal': return 'Normal';
+                            case 'high': return 'High';
+                            case 'critical': return 'Critical';
+                            default: return val;
+                          }
+                        },
                         onChanged: (val) {
                           if (val != null) setDialogState(() => selectedUrgency = val);
                         },
@@ -676,21 +695,11 @@ class _ApprovalHubViewState extends State<_ApprovalHubView> with SingleTickerPro
         // Type Filter Dropdown
         SizedBox(
           width: 170,
-          height: 40,
-          child: DropdownButtonFormField<String>(
-            initialValue: selectedType,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-            ),
-            items: _types
-                .map((t) => DropdownMenuItem(
-                      value: t['value'],
-                      child: Text(t['label']!, style: const TextStyle(fontSize: 13)),
-                    ))
-                .toList(),
+          child: AppDropdown<String>(
+            isDense: true,
+            value: selectedType,
+            items: _types.map((t) => t['value']!).toList(),
+            itemLabel: (val) => _types.firstWhere((t) => t['value'] == val)['label']!,
             onChanged: (val) {
               if (val != null) {
                 context.read<ApprovalListCubit>().setTransactionType(val);
@@ -703,21 +712,11 @@ class _ApprovalHubViewState extends State<_ApprovalHubView> with SingleTickerPro
         // Urgency Filter Dropdown
         SizedBox(
           width: 150,
-          height: 40,
-          child: DropdownButtonFormField<String>(
-            initialValue: selectedUrgency,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-              ),
-            ),
-            items: _urgencies
-                .map((u) => DropdownMenuItem(
-                      value: u['value'],
-                      child: Text(u['label']!, style: const TextStyle(fontSize: 13)),
-                    ))
-                .toList(),
+          child: AppDropdown<String>(
+            isDense: true,
+            value: selectedUrgency,
+            items: _urgencies.map((u) => u['value']!).toList(),
+            itemLabel: (val) => _urgencies.firstWhere((u) => u['value'] == val)['label']!,
             onChanged: (val) {
               if (val != null) {
                 context.read<ApprovalListCubit>().setUrgency(val);

@@ -131,6 +131,9 @@ class _AppScaffoldState extends State<AppScaffold> {
         case 'purchases':
           context.goNamed(RouteNames.purchases);
           break;
+        case 'more':
+          context.goNamed(RouteNames.more);
+          break;
         default:
           break;
       }
@@ -143,7 +146,9 @@ class _AppScaffoldState extends State<AppScaffold> {
     final isTablet = context.isTablet;
     final isDark = context.isDarkMode;
 
-    final backgroundColor = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+    final backgroundColor = isDark
+        ? AppColors.darkBackground
+        : AppColors.lightBackground;
 
     final appBar = AppAppBar(
       title: widget.title,
@@ -151,7 +156,9 @@ class _AppScaffoldState extends State<AppScaffold> {
       actions: widget.actions,
       currentShowroomName: widget.currentShowroomName,
       onShowroomSwitchTap: widget.onShowroomSwitchTap,
-      onMenuTap: !isDesktop ? () => _scaffoldKey.currentState?.openDrawer() : null,
+      onMenuTap: !isDesktop
+          ? () => _scaffoldKey.currentState?.openDrawer()
+          : null,
     );
 
     Widget scaffoldContent;
@@ -213,7 +220,9 @@ class _AppScaffoldState extends State<AppScaffold> {
         backgroundColor: backgroundColor,
         appBar: appBar,
         drawer: Drawer(
-          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          backgroundColor: isDark
+              ? AppColors.darkSurface
+              : AppColors.lightSurface,
           child: AppSidebar(
             activeItemId: _currentNavId,
             onItemTap: _handleNavigation,
@@ -245,10 +254,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           GlobalSearchModal.show(context);
         },
       },
-      child: Focus(
-        autofocus: true,
-        child: scaffoldContent,
-      ),
+      child: Focus(autofocus: true, child: scaffoldContent),
     );
   }
 }

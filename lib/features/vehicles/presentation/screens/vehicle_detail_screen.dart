@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../common/common.dart';
+import '../../../../common/widgets/vehicle_photo_gallery.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -32,7 +33,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen>
   void initState() {
     super.initState();
     _cubit = VehicleDetailCubit(modelId: widget.modelId)..loadDetails();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -110,6 +111,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen>
                           icon: const Icon(Icons.palette_rounded),
                           text: 'Colors & Palettes (${item.colors.length})',
                         ),
+                        const Tab(
+                          icon: Icon(Icons.photo_library_rounded),
+                          text: 'Photos',
+                        ),
                       ],
                     ),
                   ),
@@ -121,8 +126,13 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen>
                     builder: (context, _) {
                       if (_tabController.index == 0) {
                         return _buildVariantsSection(context, item);
-                      } else {
+                      } else if (_tabController.index == 1) {
                         return _buildColorsSection(context, item);
+                      } else {
+                        return VehiclePhotoGallery(
+                          modelId: item.model.id,
+                          title: 'Model Photos',
+                        );
                       }
                     },
                   ),

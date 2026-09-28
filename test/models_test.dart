@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mybike/core/config/app_config.dart';
 import 'package:mybike/core/config/supabase_config.dart';
 import 'package:mybike/features/auth/data/models/user_profile_model.dart';
 import 'package:mybike/features/roles/data/models/role_model.dart';
@@ -100,6 +101,11 @@ void main() {
     });
 
     test('SupabaseConfig operates safely in default/placeholder environment', () {
+      AppConfig.setEnvironment(
+        Environment.development,
+        customUrl: 'https://dev-erp.mybike.internal',
+        customAnonKey: 'dev_anon_key_placeholder',
+      );
       expect(SupabaseConfig.isConfigured, isFalse);
     });
   });

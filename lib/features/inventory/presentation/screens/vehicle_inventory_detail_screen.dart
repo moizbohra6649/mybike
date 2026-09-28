@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../common/common.dart';
+import '../../../../common/widgets/vehicle_photo_gallery.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -182,6 +183,13 @@ class _VehicleInventoryDetailScreenState extends State<VehicleInventoryDetailScr
             const SizedBox(height: AppDimensions.spacing16),
             _buildTimelineCard(context, state.movements),
           ],
+
+          // ─── Vehicle Photo Gallery ───
+          const SizedBox(height: AppDimensions.spacing20),
+          VehiclePhotoGallery(
+            vehicleId: item.vehicle.id,
+            title: 'Vehicle Photos',
+          ),
           const SizedBox(height: AppDimensions.spacing40),
         ],
       ),

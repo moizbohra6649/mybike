@@ -203,17 +203,18 @@ class _UserListScreenState extends State<UserListScreen> {
                             _cubit.loadUsers();
                           },
                           onToggleActive: () async {
+                            final currentUser = user;
                             final confirmed = await AppConfirmDialog.show(
                               context,
-                              title: user.profile.isActive ? 'Deactivate User?' : 'Activate User?',
-                              message: user.profile.isActive
-                                  ? 'This will prevent ${user.profile.fullName ?? user.profile.email} from logging in.'
-                                  : 'This will restore login access for ${user.profile.fullName ?? user.profile.email}.',
-                              confirmText: user.profile.isActive ? 'Deactivate' : 'Activate',
-                              isDestructive: user.profile.isActive,
+                              title: currentUser.profile.isActive ? 'Deactivate User?' : 'Activate User?',
+                              message: currentUser.profile.isActive
+                                  ? 'This will prevent ${currentUser.profile.fullName ?? currentUser.profile.email} from logging in.'
+                                  : 'This will restore login access for ${currentUser.profile.fullName ?? currentUser.profile.email}.',
+                              confirmText: currentUser.profile.isActive ? 'Deactivate' : 'Activate',
+                              isDestructive: currentUser.profile.isActive,
                             );
                             if (confirmed == true) {
-                              _cubit.toggleUserActive(user.profile.id, !user.profile.isActive);
+                              _cubit.toggleUserActive(currentUser.profile.id, !currentUser.profile.isActive);
                             }
                           },
                         ),

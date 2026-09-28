@@ -11,6 +11,7 @@ import '../../../../common/layouts/app_scaffold.dart';
 import '../../../../common/loaders/app_loading.dart';
 import '../../../../common/loaders/app_skeleton.dart';
 import '../../../../common/widgets/responsive_field_row.dart';
+import '../../../../common/widgets/app_dropdown.dart';
 import '../cubit/journal_entry_form_cubit.dart';
 import '../cubit/journal_entry_form_state.dart';
 
@@ -138,21 +139,27 @@ class _JournalEntryFormViewState extends State<_JournalEntryFormView> {
                                         child: Text(dateFormat.format(state.entryDate)),
                                       ),
                                     ),
-                                    DropdownButtonFormField<String>(
-                                      initialValue: state.referenceType,
-                                      isExpanded: true,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Reference Type *',
-                                        prefixIcon: Icon(Icons.receipt_rounded),
-                                        border: OutlineInputBorder(),
-                                      ),
+                                    AppDropdown<String>(
+                                      label: 'Reference Type *',
+                                      value: state.referenceType,
+                                      prefixIcon: Icons.receipt_rounded,
                                       items: const [
-                                        DropdownMenuItem(value: 'manual', child: Text('Manual General Journal')),
-                                        DropdownMenuItem(value: 'sales_invoice', child: Text('Sales Invoice Adjustment')),
-                                        DropdownMenuItem(value: 'payment_receipt', child: Text('Payment Receipt Settlement')),
-                                        DropdownMenuItem(value: 'purchase_invoice', child: Text('Purchase Bill Settlement')),
-                                        DropdownMenuItem(value: 'expense', child: Text('Expense Voucher')),
+                                        'manual',
+                                        'sales_invoice',
+                                        'payment_receipt',
+                                        'purchase_invoice',
+                                        'expense',
                                       ],
+                                      itemLabel: (v) {
+                                        switch (v) {
+                                          case 'manual': return 'Manual General Journal';
+                                          case 'sales_invoice': return 'Sales Invoice Adjustment';
+                                          case 'payment_receipt': return 'Payment Receipt Settlement';
+                                          case 'purchase_invoice': return 'Purchase Bill Settlement';
+                                          case 'expense': return 'Expense Voucher';
+                                          default: return v;
+                                        }
+                                      },
                                       onChanged: (v) {
                                         if (v != null) {
                                           context.read<JournalEntryFormCubit>().updateHeader(referenceType: v);
@@ -365,22 +372,16 @@ class _JournalEntryFormViewState extends State<_JournalEntryFormView> {
     JournalEntryFormState state,
     bool isDark,
   ) {
-    final accountField = DropdownButtonFormField<String>(
-      initialValue: line.accountId.isNotEmpty ? line.accountId : null,
-      decoration: const InputDecoration(
-        labelText: 'Account *',
-        isDense: true,
-        border: OutlineInputBorder(),
-      ),
-      items: state.availableAccounts.map((acct) {
-        return DropdownMenuItem(
-          value: acct.id,
-          child: Text(
-            '${acct.accountCode} - ${acct.accountName}',
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }).toList(),
+    final accountField = AppDropdown<String>(
+      isDense: true,
+      label: 'Account *',
+      hint: 'Select Ledger Account',
+      value: line.accountId.isNotEmpty ? line.accountId : null,
+      items: state.availableAccounts.map((a) => a.id).toList(),
+      itemLabel: (id) {
+        final acct = state.availableAccounts.where((a) => a.id == id).firstOrNull;
+        return acct != null ? '${acct.accountCode} - ${acct.accountName}' : id;
+      },
       onChanged: (val) {
         if (val != null) {
           context.read<JournalEntryFormCubit>().updateLine(index, accountId: val);

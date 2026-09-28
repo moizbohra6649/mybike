@@ -92,4 +92,7 @@ abstract final class RouteNames {
 
   // ─── Approvals ───
   static const String approvals = 'approvals';
+
+  // ─── More / Enterprise Services Hub ───
+  static const String more = 'more';
 }

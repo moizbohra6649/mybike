@@ -50,10 +50,6 @@ class _DashboardView extends StatelessWidget {
       ],
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
-          if (state.status == DashboardStatus.loading && state.salesData == null) {
-            return AppSkeleton.dashboard();
-          }
-
           if (state.status == DashboardStatus.failure && state.salesData == null) {
             return AppErrorState(
               title: 'Failed to Load Analytics',
@@ -62,20 +58,24 @@ class _DashboardView extends StatelessWidget {
             );
           }
 
+          final isLoading = state.status == DashboardStatus.loading;
+
           return Column(
             children: [
               // Global Filter Bar (Showroom Scope + Date Range)
-              _buildGlobalFilterBar(context, state, isDesktop, isDark),
+              _buildGlobalFilterBar(context, state, isDesktop, isDark, isLoading),
 
               // Tab Selector (Overview, Sales, Purchases, Inventory, Finance, Profit)
               _buildTabSelector(context, state, isDark),
 
-              // Main Active Dashboard View
+              // Main Active Dashboard View with Shimmer Loading
               Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.all(isDesktop ? AppDimensions.spacing24 : AppDimensions.spacing16),
-                  child: _buildActiveDashboard(context, state, currency, isDesktop, isDark),
-                ),
+                child: isLoading
+                    ? _buildDashboardShimmer(context, isDesktop, isDark)
+                    : SingleChildScrollView(
+                        padding: EdgeInsets.all(isDesktop ? AppDimensions.spacing24 : AppDimensions.spacing16),
+                        child: _buildActiveDashboard(context, state, currency, isDesktop, isDark),
+                      ),
               ),
             ],
           );
@@ -90,6 +90,7 @@ class _DashboardView extends StatelessWidget {
     DashboardState state,
     bool isDesktop,
     bool isDark,
+    bool isLoading,
   ) {
     final periods = [
       {'id': 'month', 'label': 'This Month (Sep)'},
@@ -97,37 +98,25 @@ class _DashboardView extends StatelessWidget {
       {'id': 'year', 'label': 'FY 2026-27'},
     ];
 
-    final dropdown = DropdownButtonHideUnderline(
-      child: DropdownButton<String?>(
+    final showroomMap = {
+      for (final s in state.showrooms) s.showroom.id: '${s.showroom.name} (${s.showroom.city})',
+    };
+    final showroomSelector = SizedBox(
+      width: isDesktop ? 320 : double.infinity,
+      child: AppDropdown<String?>(
         value: state.selectedShowroomId,
-        icon: const Icon(Icons.arrow_drop_down),
-        isExpanded: !isDesktop,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          color: isDark ? Colors.white : Colors.black87,
-        ),
-        dropdownColor: isDark ? const Color(0xFF242832) : Colors.white,
-        items: const [
-          DropdownMenuItem(value: null, child: Text('All Showrooms (Enterprise)')),
-          DropdownMenuItem(value: 'showroom-mumbai-main', child: Text('Mumbai Flagship — Central')),
-          DropdownMenuItem(value: 'showroom-pune-west', child: Text('Pune West Hub — Deccan')),
-          DropdownMenuItem(value: 'showroom-bangalore-metro', child: Text('Bangalore Metro — Indiranagar')),
+        hint: 'All Showrooms (Enterprise)',
+        prefixIcon: Icons.storefront_outlined,
+        isDense: true,
+        items: [
+          null,
+          ...state.showrooms.map((s) => s.showroom.id),
         ],
+        itemLabel: (id) => id == null
+            ? 'All Showrooms (Enterprise)'
+            : (showroomMap[id] ?? 'Showroom Branch'),
         onChanged: (val) => context.read<DashboardCubit>().filterByShowroom(val),
       ),
-    );
-
-    final showroomSelector = Row(
-      mainAxisSize: isDesktop ? MainAxisSize.min : MainAxisSize.max,
-      children: [
-        const Icon(Icons.storefront_outlined, size: 20, color: AppColors.primaryYellow),
-        const SizedBox(width: 8),
-        if (isDesktop)
-          dropdown
-        else
-          Expanded(child: dropdown),
-      ],
     );
 
     final periodPills = SingleChildScrollView(
@@ -818,6 +807,183 @@ class _DashboardView extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTypography.captionSmall.copyWith(color: AppColors.lightSecondaryText),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ─── SHIMMER LOADING PLACEHOLDER ───
+  Widget _buildDashboardShimmer(BuildContext context, bool isDesktop, bool isDark) {
+    final padding = EdgeInsets.all(isDesktop ? AppDimensions.spacing24 : AppDimensions.spacing16);
+    return SingleChildScrollView(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. KPI Cards Shimmer Strip
+          AppSkeleton.kpiGrid(count: 4, minItemWidth: isDesktop ? 240 : 160),
+          SizedBox(height: isDesktop ? AppDimensions.spacing24 : AppDimensions.spacing16),
+
+          // 2. Charts Row Shimmer
+          if (isDesktop)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _buildChartShimmerCard(context, height: 320),
+                ),
+                const SizedBox(width: AppDimensions.spacing24),
+                Expanded(
+                  flex: 2,
+                  child: _buildChartShimmerCard(context, height: 320),
+                ),
+              ],
+            )
+          else ...[
+            _buildChartShimmerCard(context, height: 280),
+            const SizedBox(height: AppDimensions.spacing16),
+            _buildChartShimmerCard(context, height: 280),
+          ],
+          SizedBox(height: isDesktop ? AppDimensions.spacing24 : AppDimensions.spacing16),
+
+          // 3. Bottom Table / List Shimmer Card
+          _buildTableShimmerCard(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChartShimmerCard(BuildContext context, {required double height}) {
+    // Pre-calculated bar heights to avoid FractionallySizedBox inside unbounded layouts
+    final barHeights = [80.0, 130.0, 100.0, 170.0, 140.0, 190.0];
+
+    return AppSkeleton.card(
+      context,
+      padding: const EdgeInsets.all(AppDimensions.spacing20),
+      child: SizedBox(
+        height: height,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title row — Expanded wraps FractionallySizedBox to provide bounded width
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.45,
+                      child: const AppShimmerBone(height: 16),
+                    ),
+                  ),
+                ),
+                const AppShimmerBone(width: 60, height: 24, radius: AppDimensions.radiusSm),
+              ],
+            ),
+            const SizedBox(height: AppDimensions.spacing8),
+            // Subtitle — standalone, no Row, so FractionallySizedBox is fine
+            const FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: 0.25,
+              child: AppShimmerBone(height: 12),
+            ),
+            const Spacer(),
+            // Shimmer Chart Bars — use fixed pixel heights instead of heightFactor
+            SizedBox(
+              height: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final h in barHeights)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: AppShimmerBone(
+                            height: h,
+                            radius: AppDimensions.radiusSm,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacing12),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                AppShimmerBone(width: 32, height: 10),
+                AppShimmerBone(width: 32, height: 10),
+                AppShimmerBone(width: 32, height: 10),
+                AppShimmerBone(width: 32, height: 10),
+                AppShimmerBone(width: 32, height: 10),
+                AppShimmerBone(width: 32, height: 10),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableShimmerCard(BuildContext context) {
+    return AppSkeleton.card(
+      context,
+      padding: const EdgeInsets.all(AppDimensions.spacing20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title row — Expanded wraps FractionallySizedBox for bounded width
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: FractionallySizedBox(
+                    widthFactor: 0.35,
+                    child: const AppShimmerBone(height: 16),
+                  ),
+                ),
+              ),
+              const AppShimmerBone(width: 80, height: 14),
+            ],
+          ),
+          const SizedBox(height: AppDimensions.spacing16),
+          for (var i = 0; i < 4; i++) ...[
+            if (i > 0) const SizedBox(height: AppDimensions.spacing12),
+            Row(
+              children: [
+                const AppShimmerBone(width: 40, height: 40, radius: AppDimensions.radiusMd),
+                const SizedBox(width: AppDimensions.spacing12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: 0.6,
+                        child: const AppShimmerBone(height: 13),
+                      ),
+                      const SizedBox(height: AppDimensions.spacing6),
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: 0.35,
+                        child: const AppShimmerBone(height: 10),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppDimensions.spacing16),
+                const AppShimmerBone(width: 70, height: 16),
+              ],
+            ),
+          ],
         ],
       ),
     );

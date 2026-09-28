@@ -62,12 +62,12 @@ class AppConfig {
   /// Development configuration preset
   static const AppConfig development = AppConfig(
     environment: Environment.development,
-    supabaseUrl: 'https://dev-erp.mybike.internal',
-    supabaseAnonKey: 'dev_anon_key_placeholder',
+    supabaseUrl: 'https://icoocxzoctdivodduybn.supabase.co',
+    supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imljb29jeHpvY3RkaXZvZGR1eWJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNzE1OTYsImV4cCI6MjEwNTg0NzU5Nn0.gfgF8ejDm_K86aLho4Tbe3Hq8XbiFVAZ4L-6k0fLF-E',
     appName: 'MYBIKE ERP (Dev)',
     fcmProjectId: 'mybike-erp-dev',
     minLogLevel: LogLevel.debug,
-    enableDevOfflineFallback: true,
+    enableDevOfflineFallback: false,
     enableAuditLogTelemetry: true,
   );
 

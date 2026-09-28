@@ -57,6 +57,7 @@ import '../../features/documents/presentation/screens/document_dms_hub_screen.da
 import '../../features/audit/presentation/screens/audit_trail_screen.dart';
 import '../../features/approvals/presentation/screens/approval_hub_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/more/presentation/screens/more_screen.dart';
 import '../../common/components/app_error_state.dart';
 
 /// MYBIKE Router Configuration
@@ -493,6 +494,13 @@ class AppRouter {
       path: '/settings',
       name: RouteNames.settings,
       builder: (context, state) => const SettingsScreen(),
+    ),
+
+    // ─── Enterprise Services Hub ("More") ───
+    GoRoute(
+      path: '/more',
+      name: RouteNames.more,
+      builder: (context, state) => const MoreScreen(),
     ),
   ];
 }
