@@ -315,7 +315,14 @@ class _VoucherListViewState extends State<_VoucherListView> {
         ),
         title: Row(
           children: [
-            Text(v.voucherNumber, style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.w700)),
+            Flexible(
+              child: Text(
+                v.voucherNumber,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -332,6 +339,8 @@ class _VoucherListViewState extends State<_VoucherListView> {
         ),
         subtitle: Text(
           '${v.partyName} • ${dateFormat.format(v.voucherDate)} • ${v.paymentModeLabel}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: AppTypography.bodySmall,
         ),
         trailing: Text(
@@ -345,50 +354,88 @@ class _VoucherListViewState extends State<_VoucherListView> {
         children: [
           const Divider(height: 1),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('General Ledger Mapping', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    Text('Source Account: ${v.sourceAccountName ?? v.sourceAccountId ?? "N/A"}', style: AppTypography.bodySmall),
-                    Text('Destination Account: ${v.destinationAccountName ?? v.destinationAccountId ?? "N/A"}', style: AppTypography.bodySmall),
-                    if (v.journalEntryId != null) ...[
+          if (context.isMobile) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('General Ledger Mapping', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text('Source Account: ${v.sourceAccountName ?? v.sourceAccountId ?? "N/A"}', style: AppTypography.bodySmall),
+                Text('Destination Account: ${v.destinationAccountName ?? v.destinationAccountId ?? "N/A"}', style: AppTypography.bodySmall),
+                if (v.journalEntryId != null) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '✓ Synchronized with General Ledger: JRN-${v.voucherNumber}',
+                      style: AppTypography.captionMedium.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Instrumentation & Narration', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                if (v.referenceNumber != null)
+                  Text('Reference / Cheque: ${v.referenceNumber}', style: AppTypography.bodySmall),
+                if (v.bankName != null)
+                  Text('Bank: ${v.bankName}', style: AppTypography.bodySmall),
+                Text('Narration: ${v.narration}', style: AppTypography.bodySmall.copyWith(fontStyle: FontStyle.italic)),
+              ],
+            ),
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('General Ledger Mapping', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
                       const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.success.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                      Text('Source Account: ${v.sourceAccountName ?? v.sourceAccountId ?? "N/A"}', style: AppTypography.bodySmall),
+                      Text('Destination Account: ${v.destinationAccountName ?? v.destinationAccountId ?? "N/A"}', style: AppTypography.bodySmall),
+                      if (v.journalEntryId != null) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '✓ Synchronized with General Ledger: JRN-${v.voucherNumber}',
+                            style: AppTypography.captionMedium.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                          ),
                         ),
-                        child: Text(
-                          '✓ Synchronized with General Ledger: JRN-${v.voucherNumber}',
-                          style: AppTypography.captionMedium.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
-                        ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Instrumentation & Narration', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
-                    if (v.referenceNumber != null)
-                      Text('Reference / Cheque: ${v.referenceNumber}', style: AppTypography.bodySmall),
-                    if (v.bankName != null)
-                      Text('Bank: ${v.bankName}', style: AppTypography.bodySmall),
-                    Text('Narration: ${v.narration}', style: AppTypography.bodySmall.copyWith(fontStyle: FontStyle.italic)),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Instrumentation & Narration', style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      if (v.referenceNumber != null)
+                        Text('Reference / Cheque: ${v.referenceNumber}', style: AppTypography.bodySmall),
+                      if (v.bankName != null)
+                        Text('Bank: ${v.bankName}', style: AppTypography.bodySmall),
+                      Text('Narration: ${v.narration}', style: AppTypography.bodySmall.copyWith(fontStyle: FontStyle.italic)),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

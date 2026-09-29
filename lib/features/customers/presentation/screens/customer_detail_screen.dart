@@ -146,21 +146,24 @@ class _ProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(customer.fullName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTypography.titleLarge.copyWith(
                       fontWeight: FontWeight.w800,
                       color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
                     )),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppDimensions.spacing8,
+                  runSpacing: 4,
                   children: [
                     Text(customer.customerNumber,
                         style: AppTypography.captionLarge.copyWith(
                           color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                           letterSpacing: 0.8,
                         )),
-                    const SizedBox(width: AppDimensions.spacing8),
                     _StatusBadge(label: customer.kycStatusLabel, color: _kycColor(customer.kycStatus)),
-                    const SizedBox(width: AppDimensions.spacing8),
                     _StatusBadge(label: customer.customerTypeLabel, color: AppColors.info),
                   ],
                 ),
@@ -332,10 +335,15 @@ class _DocumentTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(doc.documentTypeLabel, style: AppTypography.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText)),
+                  Text(doc.documentTypeLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText)),
                   Text('${doc.maskedNumber}  •  ${doc.fileSizeFormatted}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.captionLarge.copyWith(
                         color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText)),
                 ],
@@ -441,6 +449,21 @@ class _BookingsSection extends StatelessWidget {
   final bool isDark;
   const _BookingsSection({required this.bookings, required this.isDark});
 
+  Color _parseHex(String? hex) {
+    if (hex == null || hex.isEmpty) return const Color(0xFF888888);
+    try {
+      final clean = hex.replaceAll('#', '').trim();
+      if (clean.length == 6) {
+        return Color(int.parse('FF$clean', radix: 16));
+      } else if (clean.length == 8) {
+        return Color(int.parse(clean, radix: 16));
+      }
+      return const Color(0xFF888888);
+    } catch (_) {
+      return const Color(0xFF888888);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -483,7 +506,7 @@ class _BookingsSection extends StatelessWidget {
                         Container(
                           width: 16, height: 16,
                           decoration: BoxDecoration(
-                            color: Color(int.parse('0xFF${b.colorHex}')),
+                            color: _parseHex(b.colorHex),
                             borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
                             border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
                           ),
@@ -498,6 +521,8 @@ class _BookingsSection extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                                 color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText)),
                             Text('${b.modelName ?? ''} ${b.variantName ?? ''}  •  ${BookingEntity.formatInr(b.onRoadPrice)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: AppTypography.captionLarge.copyWith(
                                   color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText)),
                           ],

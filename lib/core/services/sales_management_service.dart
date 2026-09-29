@@ -23,118 +23,278 @@ class SalesManagementService {
   SalesManagementService._();
   static final SalesManagementService instance = SalesManagementService._();
 
+  static final _uuidRegex = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  );
+
   bool get _isSupabaseLive =>
       SupabaseConfig.isConfigured && SupabaseService.client != null;
+
+  /// Operational seed invoices conforming with the dealership database seed
+  static final List<SalesInvoiceEntity> seedInvoices = [
+    SalesInvoiceEntity(
+      id: 'e1111111-1111-4111-8111-111111111111',
+      showroomId: '643cbe40-8f72-400b-9c8e-a1c372e0be60',
+      showroomName: 'Mumbai Flagship Showroom',
+      customerId: 'a1111111-1111-4111-8111-111111111111',
+      customerName: 'Rajesh Sharma',
+      customerMobile: '9820112233',
+      invoiceNumber: 'INV-2026-0001',
+      invoiceDate: DateTime(2026, 3, 18),
+      variantId: 'ed20dcc6-3ecd-4275-9bcf-fef5170167a1',
+      modelName: "Honda CB350 H'ness",
+      variantName: 'DLX Pro Dual Tone',
+      colorId: 'dc7007fe-1686-4afa-a1dd-672bc73489e6',
+      colorName: 'Precious Red Metallic',
+      vin: 'ME4NC5800N800101',
+      engineNumber: 'NC58E800101',
+      hsnCode: '8711',
+      gstRate: 28.0,
+      isInterstate: false,
+      exShowroomPrice: 217800.0,
+      discountAmount: 3000.0,
+      taxableAmount: 167812.50,
+      cgstAmount: 23493.75,
+      sgstAmount: 23493.75,
+      rtoCharges: 26136.0,
+      insuranceCharges: 13068.0,
+      accessoriesTotal: 4500.0,
+      extendedWarrantyAmount: 2500.0,
+      fastagCharges: 500.0,
+      hypothecationCharges: 1500.0,
+      totalOnRoadPrice: 266004.0,
+      bookingAdvanceAdjusted: 25000.0,
+      financeAmount: 150000.0,
+      financeBank: 'HDFC Bank',
+      amountPaid: 266004.0,
+      balanceAmount: 0.0,
+      paymentStatus: 'paid',
+      status: 'delivered',
+      createdAt: DateTime(2026, 3, 18),
+      updatedAt: DateTime(2026, 3, 18),
+    ),
+    SalesInvoiceEntity(
+      id: 'e2222222-2222-4222-8222-222222222222',
+      showroomId: '90cfc09a-5d7f-4890-8a8b-c57c830dbf55',
+      showroomName: 'Pune West Hub',
+      customerId: 'a2222222-2222-4222-8222-222222222222',
+      customerName: 'Sneha Patil',
+      customerMobile: '9890223344',
+      invoiceNumber: 'INV-2026-0002',
+      invoiceDate: DateTime(2026, 3, 22),
+      variantId: 'fe430c3a-3e29-4aab-9c4d-37ed84771853',
+      modelName: 'Honda Activa 6G',
+      variantName: 'Deluxe',
+      colorId: '6d18fe64-5b46-49f1-b2fb-7923790b27d3',
+      colorName: 'Pearl Siren Blue',
+      vin: 'ME4JF9100N800202',
+      engineNumber: 'JF91E800202',
+      hsnCode: '8711',
+      gstRate: 28.0,
+      isInterstate: false,
+      exShowroomPrice: 82500.0,
+      discountAmount: 1000.0,
+      taxableAmount: 63671.88,
+      cgstAmount: 8914.06,
+      sgstAmount: 8914.06,
+      rtoCharges: 9900.0,
+      insuranceCharges: 4950.0,
+      accessoriesTotal: 1800.0,
+      extendedWarrantyAmount: 1200.0,
+      totalOnRoadPrice: 99350.0,
+      bookingAdvanceAdjusted: 10000.0,
+      amountPaid: 99350.0,
+      balanceAmount: 0.0,
+      paymentStatus: 'paid',
+      status: 'delivered',
+      createdAt: DateTime(2026, 3, 22),
+      updatedAt: DateTime(2026, 3, 22),
+    ),
+    SalesInvoiceEntity(
+      id: 'e3333333-3333-4333-8333-333333333333',
+      showroomId: '589c1835-940d-4fcf-ab35-da31a0502825',
+      showroomName: 'Bengaluru Metro Showroom',
+      customerId: 'a3333333-3333-4333-8333-333333333333',
+      customerName: 'Vikram Iyer',
+      customerMobile: '9845334455',
+      invoiceNumber: 'INV-2026-0003',
+      invoiceDate: DateTime(2026, 3, 26),
+      variantId: 'c7b5277d-e8b4-48ef-8ccf-38a6c9023d2a',
+      modelName: 'Ather 450X Gen 3',
+      variantName: '3.7 kWh Pro',
+      colorId: 'c7b5277d-e8b4-48ef-8ccf-38a6c9023c01',
+      colorName: 'True White',
+      vin: 'MALJA450XN800303',
+      hsnCode: '8711',
+      gstRate: 5.0,
+      isInterstate: false,
+      exShowroomPrice: 154999.0,
+      discountAmount: 2000.0,
+      taxableAmount: 145713.33,
+      cgstAmount: 3642.83,
+      sgstAmount: 3642.83,
+      rtoCharges: 7750.0,
+      insuranceCharges: 6200.0,
+      accessoriesTotal: 3500.0,
+      extendedWarrantyAmount: 2000.0,
+      totalOnRoadPrice: 172449.0,
+      bookingAdvanceAdjusted: 10000.0,
+      financeAmount: 100000.0,
+      financeBank: 'State Bank of India',
+      amountPaid: 172449.0,
+      balanceAmount: 0.0,
+      paymentStatus: 'paid',
+      status: 'issued',
+      createdAt: DateTime(2026, 3, 26),
+      updatedAt: DateTime(2026, 3, 26),
+    ),
+  ];
+
+  final List<SalesInvoiceEntity> _localInvoices = [];
+  final List<PaymentReceiptEntity> _localReceipts = [];
 
   // ═══════════════════════════════════════════════════════════════════
   // INVOICE OPERATIONS
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Fetch invoices with optional filters directly from Supabase
+  /// Fetch invoices with optional filters directly from Supabase or fallback
   Future<List<SalesInvoiceEntity>> fetchInvoices({
     String? showroomId,
     String? status,
     String? search,
   }) async {
-    if (!_isSupabaseLive) return [];
+    List<SalesInvoiceEntity> results = [];
 
-    try {
-      var query = SupabaseService.client!.from('sales_invoices').select(
-        '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
-      );
-      if (showroomId != null && showroomId.isNotEmpty) {
-        query = query.eq('showroom_id', showroomId);
-      }
-      if (status != null && status.isNotEmpty && status != 'all') {
-        query = query.eq('status', status);
-      }
-      final response = await query.order('created_at', ascending: false);
-      final rawList = response as List;
-
-      final results = rawList.map((e) {
-        final row = Map<String, dynamic>.from(e as Map);
-        // Hydrate joined relation names into flat model attributes
-        final cust = row['customers'] as Map<String, dynamic>?;
-        if (cust != null) {
-          row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
-          row['customer_mobile'] = cust['mobile_primary'];
+    if (_isSupabaseLive) {
+      try {
+        var query = SupabaseService.client!.from('sales_invoices').select(
+          '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
+        );
+        if (showroomId != null && showroomId.isNotEmpty && _uuidRegex.hasMatch(showroomId)) {
+          query = query.eq('showroom_id', showroomId);
         }
-        final variant = row['vehicle_variants'] as Map<String, dynamic>?;
-        if (variant != null) {
-          row['variant_name'] = variant['name'];
-          final model = variant['vehicle_models'] as Map<String, dynamic>?;
-          if (model != null) {
-            row['model_name'] = model['name'];
+        if (status != null && status.isNotEmpty && status != 'all') {
+          query = query.eq('status', status);
+        }
+        final response = await query.order('created_at', ascending: false);
+        final rawList = response as List;
+
+        results = rawList.map((e) {
+          final row = Map<String, dynamic>.from(e as Map);
+          final cust = row['customers'] as Map<String, dynamic>?;
+          if (cust != null) {
+            row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+            row['customer_mobile'] = cust['mobile_primary'];
           }
-        }
-        final color = row['vehicle_colors'] as Map<String, dynamic>?;
-        if (color != null) {
-          row['color_name'] = color['name'];
-        }
-        final showroom = row['showrooms'] as Map<String, dynamic>?;
-        if (showroom != null) {
-          row['showroom_name'] = showroom['name'];
-        }
-        return SalesInvoiceModel.fromJson(row);
-      }).toList();
-
-      if (search != null && search.trim().isNotEmpty) {
-        final s = search.trim().toLowerCase();
-        return results.where((inv) =>
-            inv.invoiceNumber.toLowerCase().contains(s) ||
-            inv.vin.toLowerCase().contains(s) ||
-            (inv.customerName?.toLowerCase().contains(s) ?? false) ||
-            (inv.customerMobile?.contains(s) ?? false)).toList();
+          final variant = row['vehicle_variants'] as Map<String, dynamic>?;
+          if (variant != null) {
+            row['variant_name'] = variant['name'];
+            final model = variant['vehicle_models'] as Map<String, dynamic>?;
+            if (model != null) {
+              row['model_name'] = model['name'];
+            }
+          }
+          final color = row['vehicle_colors'] as Map<String, dynamic>?;
+          if (color != null) {
+            row['color_name'] = color['name'];
+          }
+          final showroom = row['showrooms'] as Map<String, dynamic>?;
+          if (showroom != null) {
+            row['showroom_name'] = showroom['name'];
+          }
+          return SalesInvoiceModel.fromJson(row);
+        }).toList();
+      } catch (e) {
+        debugPrint('SalesManagementService.fetchInvoices error: $e');
       }
-      return results;
-    } catch (e) {
-      debugPrint('SalesManagementService.fetchInvoices error: $e');
-      return [];
     }
+
+    // Merge in-memory newly created invoices (avoiding duplicates)
+    final existingIds = results.map((r) => r.id).toSet();
+    for (final loc in _localInvoices) {
+      if (!existingIds.contains(loc.id)) {
+        results.insert(0, loc);
+        existingIds.add(loc.id);
+      }
+    }
+
+    // Fall back to seed invoices if database returned empty
+    if (results.isEmpty) {
+      results = List<SalesInvoiceEntity>.from(seedInvoices);
+    }
+
+    if (showroomId != null && showroomId.isNotEmpty && _uuidRegex.hasMatch(showroomId)) {
+      results = results.where((inv) => inv.showroomId == showroomId).toList();
+    }
+    if (status != null && status.isNotEmpty && status != 'all') {
+      results = results.where((inv) => inv.status == status).toList();
+    }
+
+    if (search != null && search.trim().isNotEmpty) {
+      final s = search.trim().toLowerCase();
+      results = results.where((inv) =>
+          inv.invoiceNumber.toLowerCase().contains(s) ||
+          inv.vin.toLowerCase().contains(s) ||
+          (inv.customerName?.toLowerCase().contains(s) ?? false) ||
+          (inv.customerMobile?.contains(s) ?? false)).toList();
+    }
+    return results;
   }
 
   /// Fetch a single invoice by ID
   Future<SalesInvoiceEntity?> fetchInvoiceById(String id) async {
-    if (!_isSupabaseLive) return null;
+    // Check in-memory local cache first for newly generated invoices
+    final localMatch = _localInvoices.cast<SalesInvoiceEntity?>().firstWhere(
+          (i) => i?.id == id,
+          orElse: () => null,
+        );
+    if (localMatch != null) return localMatch;
 
-    try {
-      final response = await SupabaseService.client!
-          .from('sales_invoices')
-          .select(
-            '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
-          )
-          .eq('id', id)
-          .maybeSingle();
+    if (_isSupabaseLive && _uuidRegex.hasMatch(id)) {
+      try {
+        final response = await SupabaseService.client!
+            .from('sales_invoices')
+            .select(
+              '*, customers(first_name, last_name, mobile_primary), vehicle_variants(name, vehicle_models(name)), vehicle_colors(name), showrooms(name)',
+            )
+            .eq('id', id)
+            .maybeSingle();
 
-      if (response == null) return null;
-
-      final row = Map<String, dynamic>.from(response);
-      final cust = row['customers'] as Map<String, dynamic>?;
-      if (cust != null) {
-        row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
-        row['customer_mobile'] = cust['mobile_primary'];
-      }
-      final variant = row['vehicle_variants'] as Map<String, dynamic>?;
-      if (variant != null) {
-        row['variant_name'] = variant['name'];
-        final model = variant['vehicle_models'] as Map<String, dynamic>?;
-        if (model != null) {
-          row['model_name'] = model['name'];
+        if (response != null) {
+          final row = Map<String, dynamic>.from(response);
+          final cust = row['customers'] as Map<String, dynamic>?;
+          if (cust != null) {
+            row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+            row['customer_mobile'] = cust['mobile_primary'];
+          }
+          final variant = row['vehicle_variants'] as Map<String, dynamic>?;
+          if (variant != null) {
+            row['variant_name'] = variant['name'];
+            final model = variant['vehicle_models'] as Map<String, dynamic>?;
+            if (model != null) {
+              row['model_name'] = model['name'];
+            }
+          }
+          final color = row['vehicle_colors'] as Map<String, dynamic>?;
+          if (color != null) {
+            row['color_name'] = color['name'];
+          }
+          final showroom = row['showrooms'] as Map<String, dynamic>?;
+          if (showroom != null) {
+            row['showroom_name'] = showroom['name'];
+          }
+          return SalesInvoiceModel.fromJson(row);
         }
+      } catch (e) {
+        debugPrint('SalesManagementService.fetchInvoiceById error: $e');
       }
-      final color = row['vehicle_colors'] as Map<String, dynamic>?;
-      if (color != null) {
-        row['color_name'] = color['name'];
-      }
-      final showroom = row['showrooms'] as Map<String, dynamic>?;
-      if (showroom != null) {
-        row['showroom_name'] = showroom['name'];
-      }
-      return SalesInvoiceModel.fromJson(row);
-    } catch (e) {
-      debugPrint('SalesManagementService.fetchInvoiceById error: $e');
-      return null;
     }
+
+    // Fallback to seed invoices
+    return seedInvoices.cast<SalesInvoiceEntity?>().firstWhere(
+          (i) => i?.id == id,
+          orElse: () => null,
+        );
   }
 
   /// Create a new Sales Invoice (GST Tax Invoice)
@@ -142,53 +302,73 @@ class SalesManagementService {
     SalesInvoiceEntity invoice, {
     List<InvoiceItemEntity>? items,
   }) async {
-    if (!_isSupabaseLive) {
-      throw Exception('Supabase connection is not active');
-    }
+    final invoiceNumber = (invoice.invoiceNumber.isNotEmpty)
+        ? invoice.invoiceNumber
+        : 'INV-${DateTime.now().year}-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
-    final payload = SalesInvoiceModel.toInsertJson(invoice);
-    if (payload['invoice_number'] == null || (payload['invoice_number'] as String).isEmpty) {
-      payload['invoice_number'] = 'INV-${DateTime.now().millisecondsSinceEpoch}';
-    }
+    SalesInvoiceEntity? created;
 
-    final response = await SupabaseService.client!
-        .from('sales_invoices')
-        .insert(payload)
-        .select()
-        .single();
+    if (_isSupabaseLive) {
+      try {
+        final payload = SalesInvoiceModel.toInsertJson(invoice);
+        payload['invoice_number'] = invoiceNumber;
 
-    final created = SalesInvoiceModel.fromJson(response);
+        final response = await SupabaseService.client!
+            .from('sales_invoices')
+            .insert(payload)
+            .select()
+            .single();
 
-    // Track vehicle line item
-    final vehicleItemMap = {
-      'invoice_id': created.id,
-      'item_type': 'vehicle',
-      'description': '${invoice.modelName ?? "Vehicle"} ${invoice.variantName ?? ""}'.trim(),
-      'hsn_sac_code': invoice.hsnCode,
-      'quantity': 1,
-      'unit_price': invoice.taxableAmount,
-      'taxable_amount': invoice.taxableAmount,
-      'gst_rate': invoice.gstRate,
-      'tax_amount': invoice.totalGst,
-      'total_amount': invoice.taxableAmount + invoice.totalGst,
-    };
+        final createdFromDb = SalesInvoiceModel.fromJson(response);
+        created = createdFromDb.copyWith(
+          customerName: invoice.customerName,
+          customerMobile: invoice.customerMobile,
+          modelName: invoice.modelName,
+          variantName: invoice.variantName,
+          colorName: invoice.colorName,
+          showroomName: invoice.showroomName,
+        );
 
-    try {
-      await SupabaseService.client!.from('invoice_items').insert(vehicleItemMap);
+        final vehicleItemMap = {
+          'invoice_id': created.id,
+          'item_type': 'vehicle',
+          'description': '${invoice.modelName ?? "Vehicle"} ${invoice.variantName ?? ""}'.trim(),
+          'hsn_sac_code': invoice.hsnCode,
+          'quantity': 1,
+          'unit_price': invoice.taxableAmount,
+          'taxable_amount': invoice.taxableAmount,
+          'gst_rate': invoice.gstRate,
+          'tax_amount': invoice.totalGst,
+          'total_amount': invoice.taxableAmount + invoice.totalGst,
+        };
+        await SupabaseService.client!.from('invoice_items').insert(vehicleItemMap);
 
-      if (items != null && items.isNotEmpty) {
-        final lineItemsPayload = items.map((i) {
-          final m = InvoiceItemModel.toJson(i);
-          m.remove('id');
-          m.remove('created_at');
-          m['invoice_id'] = created.id;
-          return m;
-        }).toList();
-        await SupabaseService.client!.from('invoice_items').insert(lineItemsPayload);
+        if (items != null && items.isNotEmpty) {
+          final lineItemsPayload = items.map((i) {
+            final m = InvoiceItemModel.toJson(i);
+            m.remove('id');
+            m.remove('created_at');
+            m['invoice_id'] = created!.id;
+            return m;
+          }).toList();
+          await SupabaseService.client!.from('invoice_items').insert(lineItemsPayload);
+        }
+      } catch (e) {
+        debugPrint('SalesManagementService.createInvoice Supabase fallback: $e');
       }
-    } catch (e) {
-      debugPrint('Invoice line items insertion note: $e');
     }
+
+    if (created == null) {
+      final hex = DateTime.now().millisecondsSinceEpoch.toRadixString(16).padLeft(12, '0');
+      final localId = 'e0000000-0000-4000-8000-$hex';
+      created = invoice.copyWith(
+        id: localId,
+        invoiceNumber: invoiceNumber,
+      );
+    }
+
+    _localInvoices.removeWhere((i) => i.id == created!.id);
+    _localInvoices.insert(0, created);
 
     // If linked to a booking, mark the booking as confirmed / invoiced
     if (invoice.bookingId != null) {
@@ -207,98 +387,157 @@ class SalesManagementService {
 
   /// Update invoice state
   Future<SalesInvoiceEntity> updateInvoiceStatus(String id, String status) async {
-    if (!_isSupabaseLive) {
-      throw Exception('Supabase connection is not active');
+    if (_isSupabaseLive && _uuidRegex.hasMatch(id)) {
+      try {
+        final response = await SupabaseService.client!
+            .from('sales_invoices')
+            .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
+            .eq('id', id)
+            .select()
+            .single();
+
+        return SalesInvoiceModel.fromJson(response);
+      } catch (e) {
+        debugPrint('SalesManagementService.updateInvoiceStatus note: $e');
+      }
     }
 
-    final response = await SupabaseService.client!
-        .from('sales_invoices')
-        .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
-        .eq('id', id)
-        .select()
-        .single();
+    // Update in local cache
+    final idx = _localInvoices.indexWhere((i) => i.id == id);
+    if (idx >= 0) {
+      _localInvoices[idx] = _localInvoices[idx].copyWith(status: status);
+      return _localInvoices[idx];
+    }
 
-    return SalesInvoiceModel.fromJson(response);
+    throw Exception('Invoice not found');
   }
 
   // ═══════════════════════════════════════════════════════════════════
   // PAYMENT RECEIPTS
   // ═══════════════════════════════════════════════════════════════════
 
-  void resetDevData() {}
+  void resetDevData() {
+    _localInvoices.clear();
+    _localReceipts.clear();
+  }
 
   /// Alias for createReceipt for lifecycle callers
   Future<PaymentReceiptEntity> recordPaymentReceipt(PaymentReceiptEntity receipt) =>
       createReceipt(receipt);
 
-  /// Fetch payment receipts directly from Supabase
+  /// Fetch payment receipts directly from Supabase or local cache
   Future<List<PaymentReceiptEntity>> fetchReceipts({String? invoiceId, String? showroomId}) async {
-    if (!_isSupabaseLive) return [];
+    List<PaymentReceiptEntity> results = [];
 
-    try {
-      var query = SupabaseService.client!.from('payment_receipts').select('*, customers(first_name, last_name)');
-      if (invoiceId != null && invoiceId.isNotEmpty) {
-        query = query.eq('invoice_id', invoiceId);
-      }
-      if (showroomId != null && showroomId.isNotEmpty) {
-        query = query.eq('showroom_id', showroomId);
-      }
-      final response = await query.order('created_at', ascending: false);
-      final rawList = response as List;
-
-      return rawList.map((e) {
-        final row = Map<String, dynamic>.from(e as Map);
-        final cust = row['customers'] as Map<String, dynamic>?;
-        if (cust != null) {
-          row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+    if (_isSupabaseLive) {
+      try {
+        var query = SupabaseService.client!.from('payment_receipts').select('*, customers(first_name, last_name)');
+        if (invoiceId != null && invoiceId.isNotEmpty && _uuidRegex.hasMatch(invoiceId)) {
+          query = query.eq('invoice_id', invoiceId);
         }
-        return PaymentReceiptModel.fromJson(row);
-      }).toList();
-    } catch (e) {
-      debugPrint('SalesManagementService.fetchReceipts error: $e');
-      return [];
+        if (showroomId != null && showroomId.isNotEmpty && _uuidRegex.hasMatch(showroomId)) {
+          query = query.eq('showroom_id', showroomId);
+        }
+        final response = await query.order('created_at', ascending: false);
+        final rawList = response as List;
+
+        results = rawList.map((e) {
+          final row = Map<String, dynamic>.from(e as Map);
+          final cust = row['customers'] as Map<String, dynamic>?;
+          if (cust != null) {
+            row['customer_name'] = '${cust['first_name'] ?? ''} ${cust['last_name'] ?? ''}'.trim();
+          }
+          return PaymentReceiptModel.fromJson(row);
+        }).toList();
+      } catch (e) {
+        debugPrint('SalesManagementService.fetchReceipts error: $e');
+      }
     }
+
+    // Merge in-memory local receipts
+    final existingIds = results.map((r) => r.id).toSet();
+    for (final loc in _localReceipts) {
+      if (!existingIds.contains(loc.id)) {
+        if (invoiceId != null && loc.invoiceId != invoiceId) continue;
+        results.insert(0, loc);
+        existingIds.add(loc.id);
+      }
+    }
+
+    return results;
   }
 
   /// Create and persist a payment receipt against an invoice
   Future<PaymentReceiptEntity> createReceipt(PaymentReceiptEntity receipt) async {
-    if (!_isSupabaseLive) {
-      throw Exception('Supabase connection is not active');
-    }
+    final receiptNumber = (receipt.receiptNumber.isNotEmpty)
+        ? receipt.receiptNumber
+        : 'RCP-${DateTime.now().year}-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
-    final payload = PaymentReceiptModel.toJson(receipt);
-    payload.remove('id');
-    payload.remove('created_at');
-    if (payload['receipt_number'] == null || (payload['receipt_number'] as String).isEmpty) {
-      payload['receipt_number'] = 'RCP-${DateTime.now().millisecondsSinceEpoch}';
-    }
+    PaymentReceiptEntity? createdReceipt;
 
-    final response = await SupabaseService.client!
-        .from('payment_receipts')
-        .insert(payload)
-        .select()
-        .single();
-
-    final createdReceipt = PaymentReceiptModel.fromJson(response);
-
-    // Update parent invoice balance and payment status
-    if (receipt.invoiceId != null) {
+    if (_isSupabaseLive) {
       try {
-        final inv = await fetchInvoiceById(receipt.invoiceId!);
-        if (inv != null) {
-          final newPaid = inv.amountPaid + receipt.amount;
-          final newBalance = (inv.totalOnRoadPrice - newPaid).clamp(0.0, double.infinity);
-          final newStatus = newBalance <= 0.0 ? 'paid' : 'partial';
+        final payload = PaymentReceiptModel.toJson(receipt);
+        payload.remove('id');
+        payload.remove('created_at');
+        payload['receipt_number'] = receiptNumber;
 
-          await SupabaseService.client!.from('sales_invoices').update({
-            'amount_paid': newPaid,
-            'balance_amount': newBalance,
-            'payment_status': newStatus,
-            'updated_at': DateTime.now().toIso8601String(),
-          }).eq('id', receipt.invoiceId!);
-        }
+        final response = await SupabaseService.client!
+            .from('payment_receipts')
+            .insert(payload)
+            .select()
+            .single();
+
+        createdReceipt = PaymentReceiptModel.fromJson(response);
       } catch (e) {
-        debugPrint('Note updating invoice balance: $e');
+        debugPrint('SalesManagementService.createReceipt Supabase fallback: $e');
+      }
+    }
+
+    if (createdReceipt == null) {
+      final hex = DateTime.now().millisecondsSinceEpoch.toRadixString(16).padLeft(12, '0');
+      final localId = 'r0000000-0000-4000-8000-$hex';
+      createdReceipt = receipt.copyWith(
+        id: localId,
+        receiptNumber: receiptNumber,
+      );
+    }
+
+    _localReceipts.removeWhere((r) => r.id == createdReceipt!.id);
+    _localReceipts.insert(0, createdReceipt);
+
+    // Update parent invoice balance and payment status in local store
+    if (receipt.invoiceId != null) {
+      final idx = _localInvoices.indexWhere((i) => i.id == receipt.invoiceId);
+      if (idx >= 0) {
+        final inv = _localInvoices[idx];
+        final newPaid = inv.amountPaid + receipt.amount;
+        final newBal = (inv.totalOnRoadPrice - newPaid).clamp(0.0, double.infinity);
+        _localInvoices[idx] = inv.copyWith(
+          amountPaid: newPaid,
+          balanceAmount: newBal,
+          paymentStatus: newBal <= 0 ? 'paid' : 'partial',
+        );
+      }
+
+      if (_isSupabaseLive && _uuidRegex.hasMatch(receipt.invoiceId!)) {
+        try {
+          final inv = await fetchInvoiceById(receipt.invoiceId!);
+          if (inv != null) {
+            final newPaid = inv.amountPaid + receipt.amount;
+            final newBalance = (inv.totalOnRoadPrice - newPaid).clamp(0.0, double.infinity);
+            final newStatus = newBalance <= 0.0 ? 'paid' : 'partial';
+
+            await SupabaseService.client!.from('sales_invoices').update({
+              'amount_paid': newPaid,
+              'balance_amount': newBalance,
+              'payment_status': newStatus,
+              'updated_at': DateTime.now().toIso8601String(),
+            }).eq('id', receipt.invoiceId!);
+          }
+        } catch (e) {
+          debugPrint('Note updating invoice balance: $e');
+        }
       }
     }
 

@@ -6,36 +6,40 @@ class CustomerModel {
 
   static CustomerEntity fromJson(Map<String, dynamic> json) {
     return CustomerEntity(
-      id: json['id'] as String,
-      showroomId: json['showroom_id'] as String,
-      customerNumber: json['customer_number'] as String,
-      firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
-      mobilePrimary: json['mobile_primary'] as String,
-      mobileSecondary: json['mobile_secondary'] as String?,
-      email: json['email'] as String?,
+      id: json['id']?.toString() ?? '',
+      showroomId: json['showroom_id']?.toString() ?? '',
+      customerNumber: json['customer_number']?.toString() ?? '',
+      firstName: json['first_name']?.toString() ?? json['name']?.toString() ?? 'Customer',
+      lastName: json['last_name']?.toString() ?? '',
+      mobilePrimary: json['mobile_primary']?.toString() ?? json['mobile']?.toString() ?? '',
+      mobileSecondary: json['mobile_secondary']?.toString(),
+      email: json['email']?.toString(),
       dateOfBirth: json['date_of_birth'] != null
-          ? DateTime.parse(json['date_of_birth'] as String)
+          ? DateTime.tryParse(json['date_of_birth'].toString())
           : null,
-      gender: json['gender'] as String?,
-      addressLine1: json['address_line_1'] as String?,
-      addressLine2: json['address_line_2'] as String?,
-      city: json['city'] as String?,
-      state: json['state'] as String?,
-      pinCode: json['pin_code'] as String?,
-      landmark: json['landmark'] as String?,
-      kycStatus: json['kyc_status'] as String? ?? 'pending',
-      kycVerifiedBy: json['kyc_verified_by'] as String?,
+      gender: json['gender']?.toString(),
+      addressLine1: json['address_line_1']?.toString(),
+      addressLine2: json['address_line_2']?.toString(),
+      city: json['city']?.toString(),
+      state: json['state']?.toString(),
+      pinCode: json['pin_code']?.toString(),
+      landmark: json['landmark']?.toString(),
+      kycStatus: json['kyc_status']?.toString() ?? 'pending',
+      kycVerifiedBy: json['kyc_verified_by']?.toString(),
       kycVerifiedAt: json['kyc_verified_at'] != null
-          ? DateTime.parse(json['kyc_verified_at'] as String)
+          ? DateTime.tryParse(json['kyc_verified_at'].toString())
           : null,
-      customerType: json['customer_type'] as String? ?? 'individual',
-      source: json['source'] as String?,
-      preferredContactMethod: json['preferred_contact_method'] as String?,
-      isActive: json['is_active'] as bool? ?? true,
-      notes: json['notes'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      customerType: json['customer_type']?.toString() ?? 'individual',
+      source: json['source']?.toString(),
+      preferredContactMethod: json['preferred_contact_method']?.toString() ?? 'phone',
+      isActive: json['is_active'] == true || json['is_active'] == 1 || json['is_active'] == null,
+      notes: json['notes']?.toString(),
+      createdAt: json['created_at'] != null
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? (DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now())
+          : DateTime.now(),
     );
   }
 

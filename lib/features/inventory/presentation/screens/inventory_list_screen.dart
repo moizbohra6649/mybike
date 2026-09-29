@@ -447,10 +447,14 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                item.color?.name ?? 'Color N/A',
-                style: AppTypography.captionSmall.copyWith(
-                  color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
+              Flexible(
+                child: Text(
+                  item.color?.name ?? 'Color N/A',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.captionSmall.copyWith(
+                    color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -512,19 +516,26 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.storefront_rounded, size: 14, color: AppColors.primaryYellowDark),
-                  const SizedBox(width: 4),
-                  Text(
-                    item.showroom?.name ?? 'Branch N/A',
-                    style: AppTypography.captionSmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.storefront_rounded, size: 14, color: AppColors.primaryYellowDark),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        item.showroom?.name ?? 'Branch N/A',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.captionSmall.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               AppStatusBadge(
                 label: v.pdiStatus == 'passed' ? 'PDI PASSED' : 'PDI PENDING',
                 color: v.pdiStatus == 'passed' ? const Color(0xFF10B981) : const Color(0xFFF59E0B),

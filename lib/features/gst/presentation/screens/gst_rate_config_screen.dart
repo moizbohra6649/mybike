@@ -366,18 +366,31 @@ class _AddEditRateDialogState extends State<_AddEditRateDialog> {
                 decoration: const InputDecoration(labelText: 'Tax Commodity Name'),
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _category,
-                decoration: const InputDecoration(labelText: 'Category'),
+              AppDropdown<String>(
+                label: 'Category',
+                value: _category,
+                prefixIcon: Icons.category_outlined,
                 items: const [
-                  DropdownMenuItem(value: 'vehicle_ice', child: Text('Petrol Vehicle (ICE)')),
-                  DropdownMenuItem(value: 'vehicle_ev', child: Text('Electric Vehicle (EV)')),
-                  DropdownMenuItem(value: 'spare_parts', child: Text('Spare Parts')),
-                  DropdownMenuItem(value: 'accessories', child: Text('Accessories & Riding Gear')),
-                  DropdownMenuItem(value: 'service_labor', child: Text('Workshop Labor')),
-                  DropdownMenuItem(value: 'documentation', child: Text('Documentation & Facilitation')),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
+                  'vehicle_ice',
+                  'vehicle_ev',
+                  'spare_parts',
+                  'accessories',
+                  'service_labor',
+                  'documentation',
+                  'other',
                 ],
+                itemLabel: (val) {
+                  switch (val) {
+                    case 'vehicle_ice': return 'Petrol Vehicle (ICE)';
+                    case 'vehicle_ev': return 'Electric Vehicle (EV)';
+                    case 'spare_parts': return 'Spare Parts';
+                    case 'accessories': return 'Accessories & Riding Gear';
+                    case 'service_labor': return 'Workshop Labor';
+                    case 'documentation': return 'Documentation & Facilitation';
+                    case 'other': return 'Other';
+                    default: return val;
+                  }
+                },
                 onChanged: (val) {
                   if (val != null) setState(() => _category = val);
                 },

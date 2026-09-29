@@ -293,6 +293,21 @@ class _BookingCard extends StatelessWidget {
   final BookingEntity booking;
   const _BookingCard({required this.booking});
 
+  Color _parseHex(String? hex) {
+    if (hex == null || hex.isEmpty) return const Color(0xFF888888);
+    try {
+      final clean = hex.replaceAll('#', '').trim();
+      if (clean.length == 6) {
+        return Color(int.parse('FF$clean', radix: 16));
+      } else if (clean.length == 8) {
+        return Color(int.parse(clean, radix: 16));
+      }
+      return const Color(0xFF888888);
+    } catch (_) {
+      return const Color(0xFF888888);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
@@ -350,7 +365,7 @@ class _BookingCard extends StatelessWidget {
                 Container(
                   width: 14, height: 14,
                   decoration: BoxDecoration(
-                    color: Color(int.parse('0xFF${booking.colorHex}')),
+                    color: _parseHex(booking.colorHex),
                     borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
                     border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
                   ),
@@ -411,34 +426,43 @@ class _BookingCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacing8),
 
           // Delivery + Allocation info
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AppDimensions.spacing12,
+            runSpacing: 4,
             children: [
-              if (booking.allocatedVin != null) ...[
-                Icon(Icons.fingerprint_rounded, size: 14, color: AppColors.info),
-                const SizedBox(width: 4),
-                Text(booking.allocatedVin!,
-                    style: AppTypography.overline.copyWith(
-                      color: AppColors.info, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
-                const SizedBox(width: AppDimensions.spacing12),
-              ],
-              if (booking.expectedDeliveryDate != null) ...[
-                Icon(
-                  Icons.calendar_today_outlined, size: 13,
-                  color: booking.isDeliveryOverdue ? AppColors.error
-                      : (isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
+              if (booking.allocatedVin != null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.fingerprint_rounded, size: 14, color: AppColors.info),
+                    const SizedBox(width: 4),
+                    Text(booking.allocatedVin!,
+                        style: AppTypography.overline.copyWith(
+                          color: AppColors.info, fontWeight: FontWeight.w700, letterSpacing: 0.6)),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  'Delivery: ${DateFormat('dd MMM yyyy').format(booking.expectedDeliveryDate!)}',
-                  style: AppTypography.captionLarge.copyWith(
-                    color: booking.isDeliveryOverdue ? AppColors.error
-                        : (isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
-                    fontWeight: booking.isDeliveryOverdue ? FontWeight.w700 : FontWeight.w500,
-                  ),
+              if (booking.expectedDeliveryDate != null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined, size: 13,
+                      color: booking.isDeliveryOverdue ? AppColors.error
+                          : (isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Delivery: ${DateFormat('dd MMM yyyy').format(booking.expectedDeliveryDate!)}',
+                      style: AppTypography.captionLarge.copyWith(
+                        color: booking.isDeliveryOverdue ? AppColors.error
+                            : (isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
+                        fontWeight: booking.isDeliveryOverdue ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-              if (booking.financeRequired) ...[
-                const Spacer(),
+              if (booking.financeRequired)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
@@ -448,7 +472,6 @@ class _BookingCard extends StatelessWidget {
                   child: Text('Finance: ${booking.financeProvider ?? 'Pending'}',
                       style: AppTypography.captionSmall.copyWith(fontWeight: FontWeight.w600, color: AppColors.inProgress)),
                 ),
-              ],
             ],
           ),
         ],

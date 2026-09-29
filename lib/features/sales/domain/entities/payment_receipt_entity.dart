@@ -59,6 +59,42 @@ class PaymentReceiptEntity extends Equatable {
     }
   }
 
+  PaymentReceiptEntity copyWith({
+    String? id,
+    String? showroomId,
+    String? customerId,
+    String? invoiceId,
+    String? bookingId,
+    String? receiptNumber,
+    DateTime? receiptDate,
+    double? amount,
+    String? paymentMode,
+    String? paymentReference,
+    String? bankName,
+    String? collectedBy,
+    String? notes,
+    DateTime? createdAt,
+    String? customerName,
+  }) {
+    return PaymentReceiptEntity(
+      id: id ?? this.id,
+      showroomId: showroomId ?? this.showroomId,
+      customerId: customerId ?? this.customerId,
+      invoiceId: invoiceId ?? this.invoiceId,
+      bookingId: bookingId ?? this.bookingId,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      receiptDate: receiptDate ?? this.receiptDate,
+      amount: amount ?? this.amount,
+      paymentMode: paymentMode ?? this.paymentMode,
+      paymentReference: paymentReference ?? this.paymentReference,
+      bankName: bankName ?? this.bankName,
+      collectedBy: collectedBy ?? this.collectedBy,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      customerName: customerName ?? this.customerName,
+    );
+  }
+
   @override
   List<Object?> get props => [id, receiptNumber, invoiceId, amount, paymentMode];
 }

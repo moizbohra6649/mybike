@@ -100,8 +100,16 @@ class _SalesInvoiceDetailView extends StatelessWidget {
               (isMobile && invoice != null && invoice.status == 'issued')
               ? FloatingActionButton.extended(
                   onPressed: () => context.go('/sales/${invoice.id}/delivery'),
-                  icon: const Icon(Icons.local_shipping_rounded),
-                  label: const Text('Delivery Challan'),
+                  icon: const Icon(Icons.local_shipping_rounded, size: 20),
+                  label: const Text(
+                    'Delivery Challan',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  shape: const StadiumBorder(),
+                  elevation: 4,
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
                 )
@@ -111,9 +119,11 @@ class _SalesInvoiceDetailView extends StatelessWidget {
               : invoice == null
               ? const Center(child: Text('Invoice not found'))
               : SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 12 : 24,
-                    vertical: isMobile ? 12 : 24,
+                  padding: EdgeInsets.fromLTRB(
+                    isMobile ? 12 : 24,
+                    isMobile ? 12 : 24,
+                    isMobile ? 12 : 24,
+                    isMobile ? 96 : 32, // Extra bottom padding so floating button never overlaps content text
                   ),
                   child: Center(
                     child: ConstrainedBox(
@@ -964,10 +974,13 @@ class _SalesInvoiceDetailView extends StatelessWidget {
           child: Row(
             children: [
               Text('$label1: ', style: AppTypography.bodySmall),
-              Text(
-                value1,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  value1,
+                  style: AppTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -979,11 +992,14 @@ class _SalesInvoiceDetailView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text('$label2: ', style: AppTypography.bodySmall),
-              Text(
-                value2,
-                style: AppTypography.bodySmall.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isSecondHighlighted ? AppColors.warning : null,
+              Flexible(
+                child: Text(
+                  value2,
+                  style: AppTypography.bodySmall.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isSecondHighlighted ? AppColors.warning : null,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

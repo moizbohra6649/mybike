@@ -454,24 +454,36 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
           const SizedBox(height: AppDimensions.spacing12),
 
           // Meta indicators (variants & colors count)
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 16,
+            runSpacing: 4,
             children: [
-              Icon(Icons.layers_outlined, size: 14, color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
-              const SizedBox(width: 4),
-              Text(
-                '${item.variantCount} Variants',
-                style: AppTypography.captionSmall.copyWith(
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.layers_outlined, size: 14, color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${item.variantCount} Variants',
+                    style: AppTypography.captionSmall.copyWith(
+                      color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Icon(Icons.palette_outlined, size: 14, color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
-              const SizedBox(width: 4),
-              Text(
-                '${item.colorCount} Colors',
-                style: AppTypography.captionSmall.copyWith(
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.palette_outlined, size: 14, color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${item.colorCount} Colors',
+                    style: AppTypography.captionSmall.copyWith(
+                      color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

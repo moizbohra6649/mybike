@@ -203,36 +203,76 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      order.poNumber,
-                      style: AppTypography.titleLarge.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.primaryYellowLight
-                            : AppColors.primaryYellowDark,
+                if (ResponsiveUtils.isMobile(context))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              order.poNumber,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.titleLarge.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: isDark
+                                    ? AppColors.primaryYellowLight
+                                    : AppColors.primaryYellowDark,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppDimensions.spacing8),
+                          AppStatusBadge(
+                            label: PurchaseManagementService.statusLabels[order.status] ??
+                                order.status,
+                            color: _statusColor(order.status),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: AppDimensions.spacing12),
-                    AppStatusBadge(
-                      label: PurchaseManagementService.statusLabels[order.status] ??
-                          order.status,
-                      color: _statusColor(order.status),
-                    ),
-                    const Spacer(),
-                    AppStatusBadge(
-                      label: PurchaseManagementService.categoryLabel(
-                        order.purchaseCategory,
+                      const SizedBox(height: AppDimensions.spacing8),
+                      AppStatusBadge(
+                        label: PurchaseManagementService.categoryLabel(
+                          order.purchaseCategory,
+                        ),
+                        color: AppColors.info,
+                        icon: Icons.category_outlined,
                       ),
-                      color: AppColors.info,
-                      icon: Icons.category_outlined,
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Text(
+                        order.poNumber,
+                        style: AppTypography.titleLarge.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: isDark
+                              ? AppColors.primaryYellowLight
+                              : AppColors.primaryYellowDark,
+                        ),
+                      ),
+                      const SizedBox(width: AppDimensions.spacing12),
+                      AppStatusBadge(
+                        label: PurchaseManagementService.statusLabels[order.status] ??
+                            order.status,
+                        color: _statusColor(order.status),
+                      ),
+                      const Spacer(),
+                      AppStatusBadge(
+                        label: PurchaseManagementService.categoryLabel(
+                          order.purchaseCategory,
+                        ),
+                        color: AppColors.info,
+                        icon: Icons.category_outlined,
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: AppDimensions.spacing16),
                 Text(
                   order.supplierName ?? 'Unknown vendor',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: AppTypography.headlineSmall.copyWith(
                     fontWeight: FontWeight.w700,
                   ),

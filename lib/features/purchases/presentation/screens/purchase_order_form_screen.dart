@@ -324,18 +324,32 @@ class _PurchaseOrderFormScreenState extends State<PurchaseOrderFormScreen> {
             const SizedBox(height: AppDimensions.spacing32),
 
             // ─── Actions ───
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AppButton.ghost(label: 'Cancel', onPressed: () => context.pop()),
-                const SizedBox(width: AppDimensions.spacing12),
-                AppButton.primary(
-                  label: isEditMode ? 'Update Purchase Order' : 'Create Purchase Order',
-                  leadingIcon: Icons.save_rounded,
-                  onPressed: _submitForm,
-                ),
-              ],
-            ),
+            if (context.isMobile)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppButton.primary(
+                    label: isEditMode ? 'Update Purchase Order' : 'Create Purchase Order',
+                    leadingIcon: Icons.save_rounded,
+                    onPressed: _submitForm,
+                  ),
+                  const SizedBox(height: AppDimensions.spacing12),
+                  AppButton.ghost(label: 'Cancel', onPressed: () => context.pop()),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton.ghost(label: 'Cancel', onPressed: () => context.pop()),
+                  const SizedBox(width: AppDimensions.spacing12),
+                  AppButton.primary(
+                    label: isEditMode ? 'Update Purchase Order' : 'Create Purchase Order',
+                    leadingIcon: Icons.save_rounded,
+                    onPressed: _submitForm,
+                  ),
+                ],
+              ),
             const SizedBox(height: AppDimensions.spacing32),
           ],
         ),

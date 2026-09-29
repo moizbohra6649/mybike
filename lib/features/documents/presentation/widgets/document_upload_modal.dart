@@ -6,6 +6,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../common/loaders/app_loading.dart';
 import '../../../../common/widgets/responsive_field_row.dart';
+import '../../../../common/widgets/app_dropdown.dart';
 import '../../domain/entities/dealership_document_entity.dart';
 import '../cubit/document_upload_cubit.dart';
 import '../cubit/document_upload_state.dart';
@@ -223,19 +224,17 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                       // Entity Type & Entity ID Row
                       ResponsiveFieldRow(
                         children: [
-                          DropdownButtonFormField<String>(
-                            initialValue: _entityType,
-                            isExpanded: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Linked Entity *',
-                              prefixIcon: Icon(Icons.link, size: 18),
-                            ),
-                            items: _entityTypes.map((type) {
-                              return DropdownMenuItem(
-                                value: type['value'],
-                                child: Text(type['label']!),
-                              );
-                            }).toList(),
+                          AppDropdown<String>(
+                            label: 'Linked Entity',
+                            isRequired: true,
+                            value: _entityType,
+                            prefixIcon: Icons.link,
+                            items: _entityTypes.map((type) => type['value']!).toList(),
+                            itemLabel: (val) {
+                              final match = _entityTypes.where((t) => t['value'] == val);
+                              if (match.isNotEmpty) return match.first['label']!;
+                              return val;
+                            },
                             onChanged: (val) {
                               if (val != null) setState(() => _entityType = val);
                             },
@@ -259,19 +258,17 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
                       const SizedBox(height: 16),
 
                       // Document Category
-                      DropdownButtonFormField<String>(
-                        initialValue: _documentCategory,
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Document Category *',
-                          prefixIcon: Icon(Icons.category_outlined, size: 18),
-                        ),
-                        items: _documentCategories.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat['value'],
-                            child: Text(cat['label']!),
-                          );
-                        }).toList(),
+                      AppDropdown<String>(
+                        label: 'Document Category',
+                        isRequired: true,
+                        value: _documentCategory,
+                        prefixIcon: Icons.category_outlined,
+                        items: _documentCategories.map((cat) => cat['value']!).toList(),
+                        itemLabel: (val) {
+                          final match = _documentCategories.where((c) => c['value'] == val);
+                          if (match.isNotEmpty) return match.first['label']!;
+                          return val;
+                        },
                         onChanged: _onCategoryChanged,
                       ),
                       const SizedBox(height: 16),

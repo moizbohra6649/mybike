@@ -472,6 +472,8 @@ class _SalesInvoiceListView extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               invoice.customerName ?? 'Customer',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                             ),
                             if (invoice.customerMobile != null)
@@ -549,6 +551,8 @@ class _SalesInvoiceListView extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           invoice.customerName ?? 'Customer',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                         ),
                         if (invoice.customerMobile != null)

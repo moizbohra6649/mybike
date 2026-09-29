@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/sales_invoice_entity.dart';
+import '../../../customers/domain/entities/customer_entity.dart';
 
 class BookingWizardState extends Equatable {
   final int currentStep; // 0: Customer, 1: Vehicle, 2: Pricing, 3: Payment, 4: Review
@@ -13,6 +14,11 @@ class BookingWizardState extends Equatable {
   final String? selectedCustomerId;
   final String customerName;
   final String customerMobile;
+  final List<CustomerEntity> availableCustomers;
+  final List<CustomerEntity> filteredCustomers;
+  final bool isLoadingCustomers;
+  final String customerSearchQuery;
+  final CustomerEntity? selectedCustomer;
 
   // Step 1: Vehicle & Color
   final String? selectedModelId;
@@ -50,10 +56,15 @@ class BookingWizardState extends Equatable {
     this.isSaving = false,
     this.error,
     this.savedInvoice,
-    this.selectedShowroomId = 'showroom-mumbai-main',
+    this.selectedShowroomId,
     this.selectedCustomerId,
     this.customerName = '',
     this.customerMobile = '',
+    this.availableCustomers = const [],
+    this.filteredCustomers = const [],
+    this.isLoadingCustomers = false,
+    this.customerSearchQuery = '',
+    this.selectedCustomer,
     this.selectedModelId,
     this.selectedModelName,
     this.selectedVariantId,
@@ -123,6 +134,13 @@ class BookingWizardState extends Equatable {
     String? selectedCustomerId,
     String? customerName,
     String? customerMobile,
+    List<CustomerEntity>? availableCustomers,
+    List<CustomerEntity>? filteredCustomers,
+    bool? isLoadingCustomers,
+    String? customerSearchQuery,
+    CustomerEntity? selectedCustomer,
+    bool clearSelectedCustomer = false,
+    bool clearSelectedColor = false,
     String? selectedModelId,
     String? selectedModelName,
     String? selectedVariantId,
@@ -155,16 +173,21 @@ class BookingWizardState extends Equatable {
       error: error,
       savedInvoice: savedInvoice ?? this.savedInvoice,
       selectedShowroomId: selectedShowroomId ?? this.selectedShowroomId,
-      selectedCustomerId: selectedCustomerId ?? this.selectedCustomerId,
+      selectedCustomerId: clearSelectedCustomer ? null : (selectedCustomerId ?? this.selectedCustomerId),
       customerName: customerName ?? this.customerName,
       customerMobile: customerMobile ?? this.customerMobile,
+      availableCustomers: availableCustomers ?? this.availableCustomers,
+      filteredCustomers: filteredCustomers ?? this.filteredCustomers,
+      isLoadingCustomers: isLoadingCustomers ?? this.isLoadingCustomers,
+      customerSearchQuery: customerSearchQuery ?? this.customerSearchQuery,
+      selectedCustomer: clearSelectedCustomer ? null : (selectedCustomer ?? this.selectedCustomer),
       selectedModelId: selectedModelId ?? this.selectedModelId,
       selectedModelName: selectedModelName ?? this.selectedModelName,
       selectedVariantId: selectedVariantId ?? this.selectedVariantId,
       selectedVariantName: selectedVariantName ?? this.selectedVariantName,
-      selectedColorId: selectedColorId ?? this.selectedColorId,
-      selectedColorName: selectedColorName ?? this.selectedColorName,
-      selectedColorHex: selectedColorHex ?? this.selectedColorHex,
+      selectedColorId: clearSelectedColor ? null : (selectedColorId ?? this.selectedColorId),
+      selectedColorName: clearSelectedColor ? null : (selectedColorName ?? this.selectedColorName),
+      selectedColorHex: clearSelectedColor ? null : (selectedColorHex ?? this.selectedColorHex),
       selectedVin: selectedVin ?? this.selectedVin,
       isEv: isEv ?? this.isEv,
       exShowroomPrice: exShowroomPrice ?? this.exShowroomPrice,
@@ -196,6 +219,11 @@ class BookingWizardState extends Equatable {
         selectedCustomerId,
         customerName,
         customerMobile,
+        availableCustomers,
+        filteredCustomers,
+        isLoadingCustomers,
+        customerSearchQuery,
+        selectedCustomer,
         selectedModelId,
         selectedVariantId,
         selectedColorId,

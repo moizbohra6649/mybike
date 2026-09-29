@@ -311,12 +311,14 @@ abstract final class AppTheme {
       ),
 
       // ─── Floating Action Button ───
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryYellow,
         foregroundColor: AppColors.primaryBlack,
-        elevation: 0,
-        hoverElevation: 2,
-        shape: CircleBorder(),
+        elevation: 2,
+        hoverElevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
 
       // ─── Popup Menu ───
@@ -715,12 +717,14 @@ abstract final class AppTheme {
       ),
 
       // ─── FAB ───
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryYellow,
         foregroundColor: AppColors.primaryBlack,
-        elevation: 0,
-        hoverElevation: 2,
-        shape: CircleBorder(),
+        elevation: 2,
+        hoverElevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
 
       // ─── Popup Menu ───

@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../widgets/responsive_field_row.dart';
+import '../../widgets/app_dropdown.dart';
 
 class FilterableFieldDefinition {
   final String field;
@@ -261,20 +262,16 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
       ),
       child: Builder(
         builder: (rowContext) {
-          final fieldDropdown = DropdownButtonFormField<String>(
-            initialValue: rule.field,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Field',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            ),
-            items: widget.availableFields
-                .map((f) => DropdownMenuItem(
-                      value: f.field,
-                      child: Text(f.label, style: AppTypography.captionLarge, overflow: TextOverflow.ellipsis),
-                    ))
-                .toList(),
+          final fieldDropdown = AppDropdown<String>(
+            label: 'Field',
+            value: rule.field,
+            isDense: true,
+            items: widget.availableFields.map((f) => f.field).toList(),
+            itemLabel: (f) {
+              final match = widget.availableFields.where((def) => def.field == f);
+              if (match.isNotEmpty) return match.first.label;
+              return f;
+            },
             onChanged: (val) {
               if (val != null) {
                 final def = widget.availableFields.firstWhere((f) => f.field == val);
@@ -287,20 +284,12 @@ class _AdvancedFilterModalState extends State<AdvancedFilterModal> {
             },
           );
 
-          final operatorDropdown = DropdownButtonFormField<FilterOperator>(
-            initialValue: rule.operator,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Operator',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            ),
-            items: currentFieldDef.supportedOperators
-                .map((op) => DropdownMenuItem(
-                      value: op,
-                      child: Text(op.label, style: AppTypography.captionLarge, overflow: TextOverflow.ellipsis),
-                    ))
-                .toList(),
+          final operatorDropdown = AppDropdown<FilterOperator>(
+            label: 'Operator',
+            value: rule.operator,
+            isDense: true,
+            items: currentFieldDef.supportedOperators,
+            itemLabel: (op) => op.label,
             onChanged: (val) {
               if (val != null) setState(() => rule.operator = val);
             },

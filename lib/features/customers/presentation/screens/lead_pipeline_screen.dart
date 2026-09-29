@@ -331,6 +331,8 @@ class _LeadCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(lead.displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTypography.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
                           color: isDark ? AppColors.darkPrimaryText : AppColors.lightPrimaryText)),

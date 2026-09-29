@@ -448,19 +448,31 @@ class _CustomerCard extends StatelessWidget {
                       Icon(Icons.phone_outlined, size: 14,
                           color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText),
                       const SizedBox(width: 4),
-                      Text(customer.mobilePrimary,
+                      Flexible(
+                        child: Text(
+                          customer.mobilePrimary,
                           style: AppTypography.captionLarge.copyWith(
                             color: isDark ? AppColors.darkSecondaryText : AppColors.lightSecondaryText,
-                          )),
-                      const SizedBox(width: AppDimensions.spacing12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (isDark ? AppColors.darkBorder : AppColors.lightBorder).withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        child: Text(customer.customerTypeLabel,
-                            style: AppTypography.captionSmall.copyWith(fontWeight: FontWeight.w600)),
+                      ),
+                      const SizedBox(width: AppDimensions.spacing8),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: (isDark ? AppColors.darkBorder : AppColors.lightBorder).withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                          ),
+                          child: Text(
+                            customer.customerTypeLabel,
+                            style: AppTypography.captionSmall.copyWith(fontWeight: FontWeight.w600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                     ],
                   ),

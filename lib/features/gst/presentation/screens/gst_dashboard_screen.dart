@@ -703,16 +703,27 @@ class _TaxCalculatorDialogState extends State<_TaxCalculatorDialog> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _hsnCode,
-                decoration: const InputDecoration(labelText: 'HSN / SAC Code & Item Type'),
+              AppDropdown<String>(
+                label: 'HSN / SAC Code & Item Type',
+                value: _hsnCode,
+                prefixIcon: Icons.receipt_long_outlined,
                 items: const [
-                  DropdownMenuItem(value: '8711', child: Text('8711 — Petrol Vehicle (28% GST)')),
-                  DropdownMenuItem(value: '8711-EV', child: Text('8711-EV — Electric Vehicle (5% GST)')),
-                  DropdownMenuItem(value: '8714', child: Text('8714 — Spare Parts (18% GST)')),
-                  DropdownMenuItem(value: '8714-ACC', child: Text('8714-ACC — Accessories (28% GST)')),
-                  DropdownMenuItem(value: '9987', child: Text('9987 — Workshop Labor (18% GST)')),
+                  '8711',
+                  '8711-EV',
+                  '8714',
+                  '8714-ACC',
+                  '9987',
                 ],
+                itemLabel: (val) {
+                  switch (val) {
+                    case '8711': return '8711 — Petrol Vehicle (28% GST)';
+                    case '8711-EV': return '8711-EV — Electric Vehicle (5% GST)';
+                    case '8714': return '8714 — Spare Parts (18% GST)';
+                    case '8714-ACC': return '8714-ACC — Accessories (28% GST)';
+                    case '9987': return '9987 — Workshop Labor (18% GST)';
+                    default: return val;
+                  }
+                },
                 onChanged: (val) {
                   if (val != null) setState(() => _hsnCode = val);
                 },
