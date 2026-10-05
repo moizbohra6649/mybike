@@ -44,6 +44,7 @@ class _ShowroomDetailScreenState extends State<ShowroomDetailScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: () => _cubit.loadShowroomDetail(widget.showroomId),
         activeNavigationId: 'showrooms',
         currentShowroomName: 'Showroom Detail',
         title: 'Branch Profile',

@@ -45,6 +45,7 @@ class _SupplierListScreenState extends State<SupplierListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: () => _cubit.loadSuppliers(refresh: true),
         activeNavigationId: 'suppliers',
         currentShowroomName: 'Procurement',
         title: 'Supplier Management',

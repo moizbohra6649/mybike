@@ -16,18 +16,18 @@ class InvoiceSequenceModel extends InvoiceSequenceEntity {
 
   factory InvoiceSequenceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceSequenceModel(
-      id: json['id'] as String,
-      showroomId: json['showroom_id'] as String,
-      financialYearId: json['financial_year_id'] as String?,
-      docType: json['doc_type'] as String,
-      prefix: json['prefix'] as String? ?? 'MB',
+      id: json['id']?.toString() ?? '',
+      showroomId: json['showroom_id']?.toString() ?? '',
+      financialYearId: json['financial_year_id']?.toString(),
+      docType: (json['doc_type'] ?? json['sequence_type'])?.toString() ?? 'sales_invoice',
+      prefix: json['prefix']?.toString() ?? 'MB',
       currentNumber: (json['current_number'] as num?)?.toInt() ?? 0,
       paddingZeros: (json['padding_zeros'] as num?)?.toInt() ?? 5,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? (DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
     );
   }
@@ -37,10 +37,9 @@ class InvoiceSequenceModel extends InvoiceSequenceEntity {
       'id': id,
       'showroom_id': showroomId,
       'financial_year_id': financialYearId,
-      'doc_type': docType,
+      'sequence_type': docType,
       'prefix': prefix,
       'current_number': currentNumber,
-      'padding_zeros': paddingZeros,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };

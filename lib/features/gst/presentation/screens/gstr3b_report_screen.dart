@@ -36,6 +36,7 @@ class _Gstr3bReportView extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<Gstr3bReportCubit>().loadReport(),
       title: 'GSTR-3B Monthly Summary Return',
       activeNavigationId: 'gst',
       actions: [

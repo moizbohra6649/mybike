@@ -39,6 +39,7 @@ class _DashboardView extends StatelessWidget {
     final currency = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
 
     return AppScaffold(
+      onRefresh: () => context.read<DashboardCubit>().loadDashboard(),
       title: 'Enterprise Analytics Command Center',
       activeNavigationId: 'dashboard',
       actions: [

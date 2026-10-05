@@ -80,6 +80,7 @@ class _SupplierDetailScreenState extends State<SupplierDetailScreen> {
     final supplier = _supplier;
 
     return AppScaffold(
+      onRefresh: _load,
       activeNavigationId: 'suppliers',
       currentShowroomName: 'Procurement',
       title: supplier?.name ?? 'Supplier Details',

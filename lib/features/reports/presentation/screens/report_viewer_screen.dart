@@ -44,6 +44,7 @@ class _ReportViewerContent extends StatelessWidget {
         final cubit = context.read<ReportViewerCubit>();
 
         return AppScaffold(
+          onRefresh: () => cubit.loadReport(),
           title: state.title.isNotEmpty ? state.title : 'Report Viewer',
           activeNavigationId: 'reports',
           actions: [

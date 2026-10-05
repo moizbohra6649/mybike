@@ -23,6 +23,10 @@ class AppScaffold extends StatefulWidget {
   final String currentShowroomName;
   final VoidCallback? onShowroomSwitchTap;
 
+  /// When provided, the body is wrapped in a pull-to-refresh
+  /// [RefreshIndicator] that awaits this callback.
+  final Future<void> Function()? onRefresh;
+
   const AppScaffold({
     super.key,
     required this.body,
@@ -36,6 +40,7 @@ class AppScaffold extends StatefulWidget {
     this.showSidebarOnDesktop = true,
     this.currentShowroomName = 'Central Showroom',
     this.onShowroomSwitchTap,
+    this.onRefresh,
   });
 
   @override
@@ -161,6 +166,20 @@ class _AppScaffoldState extends State<AppScaffold> {
           : null,
     );
 
+    final Widget body = widget.onRefresh == null
+        ? widget.body
+        : RefreshIndicator(
+            onRefresh: widget.onRefresh!,
+            color: AppColors.primaryYellowDark,
+            // Accept vertical scroll notifications from any depth so nested
+            // layouts (tabs, LayoutBuilders, etc.) still trigger refresh.
+            notificationPredicate: (n) => n.metrics.axis == Axis.vertical,
+            child: ScrollConfiguration(
+              behavior: const _AlwaysScrollableBehavior(),
+              child: widget.body,
+            ),
+          );
+
     Widget scaffoldContent;
 
     // Desktop Layout (Sidebar + Top App Bar + Main Content)
@@ -179,7 +198,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                 child: Column(
                   children: [
                     appBar,
-                    Expanded(child: widget.body),
+                    Expanded(child: body),
                   ],
                 ),
               ),
@@ -204,7 +223,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                 child: Column(
                   children: [
                     appBar,
-                    Expanded(child: widget.body),
+                    Expanded(child: body),
                   ],
                 ),
               ),
@@ -233,7 +252,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           bottom: widget.showBottomNavOnMobile ? false : true,
           left: true,
           right: true,
-          child: widget.body,
+          child: body,
         ),
         bottomNavigationBar: widget.showBottomNavOnMobile
             ? AppBottomNavigation(
@@ -257,4 +276,14 @@ class _AppScaffoldState extends State<AppScaffold> {
       child: Focus(autofocus: true, child: scaffoldContent),
     );
   }
+}
+
+/// Makes scrollables always scrollable so pull-to-refresh works even when
+/// the content is shorter than the viewport.
+class _AlwaysScrollableBehavior extends MaterialScrollBehavior {
+  const _AlwaysScrollableBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      AlwaysScrollableScrollPhysics(parent: super.getScrollPhysics(context));
 }

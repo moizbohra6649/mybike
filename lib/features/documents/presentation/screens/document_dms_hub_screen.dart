@@ -173,6 +173,7 @@ class _DocumentDmsHubViewState extends State<_DocumentDmsHubView> {
         }
 
         return AppScaffold(
+          onRefresh: () => context.read<DocumentListCubit>().loadDocuments(),
           title: 'Document Hub (DMS)',
           activeNavigationId: 'documents',
           actions: [

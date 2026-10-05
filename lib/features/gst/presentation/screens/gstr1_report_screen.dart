@@ -36,6 +36,7 @@ class _Gstr1ReportView extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<Gstr1ReportCubit>().loadReport(),
       title: 'GSTR-1 Outward Supplies Return',
       activeNavigationId: 'gst',
       actions: [

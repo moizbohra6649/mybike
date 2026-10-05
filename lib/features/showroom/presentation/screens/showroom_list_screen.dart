@@ -43,6 +43,7 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: () => _cubit.loadShowrooms(refresh: true),
         activeNavigationId: 'showrooms',
         currentShowroomName: 'Showrooms Directory',
         title: 'Showroom Management',
@@ -249,25 +250,27 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
           ),
           const SizedBox(height: AppDimensions.spacing24),
 
-          // ─── Toolbar: Search & Filters ───
+          // ─── Toolbar: Search (full width) ───
+          SizedBox(
+            width: double.infinity,
+            child: AppSearchField(
+              controller: _searchController,
+              hint: 'Search showroom by name, code, city...',
+              onChanged: (val) => _cubit.searchShowrooms(val),
+              onClear: () {
+                _searchController.clear();
+                _cubit.searchShowrooms('');
+              },
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spacing12),
+
+          // ─── Filters ───
           Wrap(
             spacing: AppDimensions.spacing12,
             runSpacing: AppDimensions.spacing12,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              SizedBox(
-                width: 320,
-                child: AppSearchField(
-                  controller: _searchController,
-                  hint: 'Search showroom by name, code, city...',
-                  onChanged: (val) => _cubit.searchShowrooms(val),
-                  onClear: () {
-                    _searchController.clear();
-                    _cubit.searchShowrooms('');
-                  },
-                ),
-              ),
-
               // Filter Chips
               FilterChip(
                 label: const Text('All Branches'),
@@ -320,21 +323,23 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
                   desktop: 3,
                 );
 
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.showrooms.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: AppDimensions.spacing16,
-                    mainAxisSpacing: AppDimensions.spacing16,
-                    mainAxisExtent: 290,
-                  ),
-                  itemBuilder: (context, index) {
+                const spacing = AppDimensions.spacing16;
+                final itemWidth = (constraints.maxWidth -
+                        spacing * (crossAxisCount - 1)) /
+                    crossAxisCount;
+
+                // Wrap (instead of a fixed-extent grid) lets each card size
+                // to its content, avoiding empty gaps inside the card.
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: List.generate(state.showrooms.length, (index) {
                     final item = state.showrooms[index];
                     final isCurrentOperating = activeContext?.id == item.showroom.id;
 
-                    return _ShowroomCard(
+                    return SizedBox(
+                      width: itemWidth,
+                      child: _ShowroomCard(
                       item: item,
                       isCurrentOperating: isCurrentOperating,
                       onViewDetails: () async {
@@ -360,8 +365,9 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
                           setState(() {});
                         }
                       },
+                      ),
                     );
-                  },
+                  }),
                 );
               },
             ),
@@ -398,6 +404,7 @@ class _ShowroomCard extends StatelessWidget {
           ? const BorderSide(color: AppColors.primaryYellow, width: 2)
           : null,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ─── Header: Code Badge, Status, Current Context Indicator ───
@@ -505,7 +512,7 @@ class _ShowroomCard extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: AppDimensions.spacing12),
 
           // ─── Metadata Badges ───
           Wrap(
@@ -515,7 +522,7 @@ class _ShowroomCard extends StatelessWidget {
               if (showroom.gstin != null && showroom.gstin!.isNotEmpty)
                 _ChipTag(
                   icon: Icons.receipt_long_outlined,
-                  text: 'GST: ${showroom.gstin!.substring(0, 5)}...',
+                  text: 'GST: ${showroom.gstin!.length >= 5 ? showroom.gstin!.substring(0, 5) : showroom.gstin!}...',
                 ),
               _ChipTag(
                 icon: Icons.tag_rounded,

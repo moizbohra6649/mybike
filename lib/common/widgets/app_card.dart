@@ -51,7 +51,11 @@ class _AppCardState extends State<AppCard> {
 
     final hasHeader = widget.title != null || widget.trailing != null;
 
-    Widget cardBody = Column(
+    // When there is no header, pass the child through directly so it receives
+    // the parent's (possibly bounded) constraints. Wrapping it in a
+    // min-sized Column would give it unbounded height and break any
+    // Spacer/Expanded used inside fixed-height cards (e.g. grid tiles).
+    Widget cardBody = !hasHeader ? widget.child : Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [

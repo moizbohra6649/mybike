@@ -27,6 +27,40 @@ class ShowroomService {
   /// Check if user has multiple authorized showrooms
   bool get hasMultipleShowrooms => _authorizedShowrooms.length > 1;
 
+  /// Dynamically add or update a showroom in authorized list
+  void addOrUpdateShowroom(ShowroomEntity showroom, {bool setActiveIfEmpty = true}) {
+    final idx = _authorizedShowrooms.indexWhere((s) => s.id == showroom.id);
+    if (idx >= 0) {
+      _authorizedShowrooms[idx] = showroom;
+      if (_activeShowroom?.id == showroom.id) {
+        _activeShowroom = showroom;
+        activeShowroomNotifier.value = showroom;
+      }
+    } else {
+      _authorizedShowrooms.add(showroom);
+      if (_activeShowroom == null && setActiveIfEmpty) {
+        _activeShowroom = showroom;
+        activeShowroomNotifier.value = showroom;
+      }
+    }
+  }
+
+  /// Update the full list of authorized showrooms
+  void updateAuthorizedShowrooms(List<ShowroomEntity> showrooms) {
+    if (showrooms.isEmpty) return;
+    _authorizedShowrooms = List.from(showrooms);
+    if (_activeShowroom == null) {
+      _activeShowroom = _authorizedShowrooms.first;
+      activeShowroomNotifier.value = _activeShowroom;
+    } else {
+      final match = _authorizedShowrooms.where((s) => s.id == _activeShowroom!.id);
+      if (match.isNotEmpty) {
+        _activeShowroom = match.first;
+        activeShowroomNotifier.value = _activeShowroom;
+      }
+    }
+  }
+
   /// Initialize authorized showrooms and load active selection
   Future<void> initialize({
     required List<ShowroomEntity> authorizedShowrooms,

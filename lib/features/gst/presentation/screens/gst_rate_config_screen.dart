@@ -33,6 +33,7 @@ class _GstRateConfigView extends StatelessWidget {
     final isDark = context.isDarkMode;
 
     return AppScaffold(
+      onRefresh: () => context.read<GstRateConfigCubit>().loadRates(),
       title: 'GST Tax Rates Master',
       activeNavigationId: 'gst',
       actions: [

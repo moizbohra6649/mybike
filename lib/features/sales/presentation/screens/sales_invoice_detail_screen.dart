@@ -52,6 +52,7 @@ class _SalesInvoiceDetailView extends StatelessWidget {
         final isMobile = context.isMobile;
 
         return AppScaffold(
+          onRefresh: invoice == null ? null : () => context.read<SalesInvoiceDetailCubit>().loadInvoice(invoice.id),
           activeNavigationId: 'sales',
           title: invoice != null
               ? 'Tax Invoice: ${invoice.invoiceNumber}'

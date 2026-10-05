@@ -44,6 +44,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: () => _cubit.loadOrders(refresh: true),
         activeNavigationId: 'purchases',
         currentShowroomName: 'Procurement',
         title: 'Purchase Orders',

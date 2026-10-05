@@ -36,6 +36,7 @@ class _FinanceDashboardView extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<FinanceDashboardCubit>().loadDashboard(),
       title: 'Finance & Cash/Bank Hub',
       activeNavigationId: 'finance',
       actions: [

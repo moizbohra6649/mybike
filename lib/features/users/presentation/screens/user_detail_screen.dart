@@ -61,6 +61,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      onRefresh: _loadUser,
       activeNavigationId: 'users',
       currentShowroomName: 'User Management',
       title: 'User Profile',

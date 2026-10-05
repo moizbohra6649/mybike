@@ -27,29 +27,29 @@ class ShowroomModel extends ShowroomEntity {
 
   factory ShowroomModel.fromJson(Map<String, dynamic> json) {
     return ShowroomModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      code: json['code'] as String,
-      address: json['address'] as String,
-      city: json['city'] as String,
-      state: json['state'] as String,
-      pincode: json['pincode'] as String,
-      phone: json['phone'] as String,
-      email: json['email'] as String?,
-      gstin: json['gstin'] as String?,
-      pan: json['pan'] as String?,
-      logoUrl: json['logo_url'] as String?,
-      bankName: json['bank_name'] as String?,
-      bankAccountNumber: json['bank_account_number'] as String?,
-      bankIfsc: json['bank_ifsc'] as String?,
-      bankBranch: json['bank_branch'] as String?,
-      invoicePrefix: json['invoice_prefix'] as String? ?? 'MB',
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Unnamed Showroom',
+      code: json['code']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      state: json['state']?.toString() ?? '',
+      pincode: json['pincode']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      email: json['email']?.toString(),
+      gstin: json['gstin']?.toString(),
+      pan: json['pan']?.toString(),
+      logoUrl: json['logo_url']?.toString(),
+      bankName: json['bank_name']?.toString(),
+      bankAccountNumber: json['bank_account_number']?.toString(),
+      bankIfsc: json['bank_ifsc']?.toString(),
+      bankBranch: json['bank_branch']?.toString(),
+      invoicePrefix: json['invoice_prefix']?.toString() ?? 'MB',
       isActive: json['is_active'] as bool? ?? true,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? (DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? (DateTime.tryParse(json['updated_at'].toString()) ?? DateTime.now())
           : DateTime.now(),
     );
   }

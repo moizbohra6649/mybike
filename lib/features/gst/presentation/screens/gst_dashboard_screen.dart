@@ -36,6 +36,7 @@ class _GstDashboardView extends StatelessWidget {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<GstDashboardCubit>().loadDashboard(),
       title: 'GST & Statutory Tax Hub',
       activeNavigationId: 'gst',
       actions: [

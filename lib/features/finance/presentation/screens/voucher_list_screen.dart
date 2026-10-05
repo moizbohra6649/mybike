@@ -57,6 +57,7 @@ class _VoucherListViewState extends State<_VoucherListView> {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<VoucherListCubit>().loadVouchers(),
       title: 'Financial Voucher Register',
       activeNavigationId: 'finance',
       actions: [

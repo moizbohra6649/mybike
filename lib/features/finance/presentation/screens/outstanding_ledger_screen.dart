@@ -49,6 +49,7 @@ class _OutstandingLedgerViewState extends State<_OutstandingLedgerView> {
     final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return AppScaffold(
+      onRefresh: () => context.read<OutstandingCubit>().loadOutstandings(),
       title: 'Outstanding Ledger & Aging',
       activeNavigationId: 'finance',
       actions: [

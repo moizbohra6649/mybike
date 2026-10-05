@@ -50,6 +50,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadCatalog,
         activeNavigationId: 'vehicles',
         currentShowroomName: 'Vehicle Master',
         title: 'Vehicle Master',

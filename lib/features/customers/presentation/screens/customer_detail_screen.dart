@@ -62,6 +62,7 @@ class _CustomerDetailView extends StatelessWidget {
         }
 
         return AppScaffold(
+          onRefresh: () => context.read<CustomerDetailCubit>().loadCustomer(customer.id),
           title: customer.fullName,
           activeNavigationId: 'customers',
           body: ListView(

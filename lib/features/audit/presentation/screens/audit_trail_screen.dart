@@ -113,6 +113,7 @@ class _AuditTrailViewState extends State<_AuditTrailView> {
         }
 
         return AppScaffold(
+          onRefresh: () => context.read<AuditLogCubit>().loadLogs(),
           title: 'Audit Trail & Compliance',
           activeNavigationId: 'audit-logs',
           actions: [

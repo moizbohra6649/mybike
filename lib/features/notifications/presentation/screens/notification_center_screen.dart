@@ -38,6 +38,7 @@ class _NotificationCenterContent extends StatelessWidget {
         final filteredList = state.filteredNotifications;
 
         return AppScaffold(
+          onRefresh: () => cubit.loadNotifications(),
           title: 'Notification Center',
           activeNavigationId: 'dashboard',
           actions: [

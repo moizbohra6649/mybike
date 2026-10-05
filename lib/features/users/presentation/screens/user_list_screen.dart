@@ -40,6 +40,7 @@ class _UserListScreenState extends State<UserListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadUsers,
         activeNavigationId: 'users',
         currentShowroomName: 'All Showrooms',
         title: 'User Management',

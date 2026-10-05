@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/user_management_service.dart';
 import '../../../../core/services/role_management_service.dart';
-import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/showroom_management_service.dart';
 import 'user_form_state.dart';
 
 /// User Form (Create/Edit) Cubit
@@ -21,7 +21,8 @@ class UserFormCubit extends Cubit<UserFormState> {
     emit(const UserFormLoading());
     try {
       final roles = await _roleService.fetchRoles();
-      final showrooms = AuthService.devShowrooms; // In live mode, fetch from showrooms table
+      final showroomStats = await ShowroomManagementService.instance.fetchShowrooms(isActive: true);
+      final showrooms = showroomStats.map((s) => s.showroom).toList();
 
       emit(UserFormReady(
         existingUser: null,
@@ -46,7 +47,8 @@ class UserFormCubit extends Cubit<UserFormState> {
       }
 
       final roles = await _roleService.fetchRoles();
-      final showrooms = AuthService.devShowrooms;
+      final showroomStats = await ShowroomManagementService.instance.fetchShowrooms(isActive: true);
+      final showrooms = showroomStats.map((s) => s.showroom).toList();
 
       emit(UserFormReady(
         existingUser: user,

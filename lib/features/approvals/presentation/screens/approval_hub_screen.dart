@@ -345,6 +345,7 @@ class _ApprovalHubViewState extends State<_ApprovalHubView> with SingleTickerPro
         }
 
         return AppScaffold(
+          onRefresh: () async { await Future.wait([context.read<ApprovalListCubit>().loadRequests(), context.read<ApprovalRulesCubit>().loadRules()]); },
           title: 'Approval Workflow',
           activeNavigationId: 'approvals',
           actions: [

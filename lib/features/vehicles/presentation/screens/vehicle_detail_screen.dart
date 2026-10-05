@@ -52,6 +52,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen>
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadDetails,
         activeNavigationId: 'vehicles',
         currentShowroomName: 'Vehicle Master',
         title: 'Vehicle Details',

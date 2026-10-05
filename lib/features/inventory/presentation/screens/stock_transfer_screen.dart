@@ -38,6 +38,7 @@ class _StockTransferScreenState extends State<StockTransferScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadTransfers,
         activeNavigationId: 'inventory',
         currentShowroomName: 'Stock Transfers',
         title: 'Inter-Branch Transfers',

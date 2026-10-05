@@ -128,6 +128,7 @@ class _DeliveryChallanScreenState extends State<DeliveryChallanScreen> {
     final isDark = context.isDarkMode;
 
     return AppScaffold(
+      onRefresh: _loadInvoice,
       activeNavigationId: 'sales',
       title: 'Vehicle Delivery Handover',
       body: _isLoading

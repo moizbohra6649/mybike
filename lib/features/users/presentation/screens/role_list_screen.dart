@@ -40,6 +40,7 @@ class _RoleListScreenState extends State<RoleListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadRoles,
         activeNavigationId: 'users',
         currentShowroomName: 'Administration',
         title: 'Roles & Permissions',

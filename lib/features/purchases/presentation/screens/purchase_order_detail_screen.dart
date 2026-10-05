@@ -129,6 +129,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
     final order = _order;
 
     return AppScaffold(
+      onRefresh: _load,
       activeNavigationId: 'purchases',
       currentShowroomName: 'Procurement',
       title: order?.poNumber ?? 'Purchase Order',

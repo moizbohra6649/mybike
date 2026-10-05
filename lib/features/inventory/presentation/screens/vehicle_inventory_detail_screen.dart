@@ -81,6 +81,7 @@ class _VehicleInventoryDetailScreenState extends State<VehicleInventoryDetailScr
           final item = state.item;
 
           return AppScaffold(
+            onRefresh: _cubit.loadDetails,
             activeNavigationId: 'inventory',
             currentShowroomName: item?.showroom?.name ?? 'VIN Dossier',
             title: item != null ? 'VIN Dossier: ${item.vehicle.vin}' : 'Vehicle Unit Dossier',

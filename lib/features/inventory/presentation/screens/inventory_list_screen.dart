@@ -51,6 +51,7 @@ class _InventoryListScreenState extends State<InventoryListScreen> {
     return BlocProvider.value(
       value: _cubit,
       child: AppScaffold(
+        onRefresh: _cubit.loadInventory,
         activeNavigationId: 'inventory',
         currentShowroomName: 'Inventory & Stock',
         title: 'Vehicle Inventory',
