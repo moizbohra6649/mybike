@@ -47,6 +47,16 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
         activeNavigationId: 'showrooms',
         currentShowroomName: 'Showrooms Directory',
         title: 'Showroom Management',
+        floatingActionButton: FloatingActionButton(
+          tooltip: 'Add Showroom',
+          backgroundColor: AppColors.primaryYellow,
+          foregroundColor: AppColors.primaryBlack,
+          onPressed: () async {
+            await context.pushNamed(RouteNames.showroomCreate);
+            _cubit.loadShowrooms(refresh: true);
+          },
+          child: const Icon(Icons.add_business_rounded),
+        ),
         body: BlocConsumer<ShowroomListCubit, ShowroomListState>(
           listener: (context, state) {
             if (state is ShowroomListError) {
@@ -85,22 +95,6 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── Header ───
-          AppSectionHeader(
-            title: 'Showrooms & Branches',
-            countBadge: state.totalCount,
-            subtitle: 'Manage dealership branch locations, statutory tax compliance, and sequence numbering',
-            trailing: AppButton.primary(
-              label: 'Add Showroom',
-              leadingIcon: Icons.add_business_rounded,
-              onPressed: () async {
-                await context.pushNamed(RouteNames.showroomCreate);
-                _cubit.loadShowrooms(refresh: true);
-              },
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacing20),
-
           // ─── Stat KPI Cards ───
           LayoutBuilder(
             builder: (context, constraints) {
@@ -371,6 +365,9 @@ class _ShowroomListScreenState extends State<ShowroomListScreen> {
                 );
               },
             ),
+
+          // Bottom space so the FAB doesn't overlap the last card
+          const SizedBox(height: 80),
         ],
       ),
     );
